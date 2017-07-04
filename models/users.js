@@ -35,10 +35,13 @@ module.exports.getUserByUsername=function(username,callback){
 }
 
 module.exports.addUser=function(newUser,callback){
+    var data={
+        username:newUser.username
+    }
     bcrypt.hash(newUser.password,10,function(err,hash){
         newUser.password=hash;
-        
-    newUser.save(callback);
+       newUser.save(callback);
+           
     });
 }
 module.exports.comparePassword=function(password,hash,callback){

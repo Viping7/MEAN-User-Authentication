@@ -11,14 +11,23 @@ router.post('/register',function(req,res){
         username:req.body.username,
         password:req.body.password
     })
-    User.addUser(newUser,function(err,user){
+    User.getUserByUsername(newUser.username,function(err,user){
+        if(err) throw err;
+        if(user){
+            res.json({success:false,msg:"Username Taken"});
+        }
+        else{
+            User.addUser(newUser,function(err,user){
         if(err){
             res.json({success:false});
         }
         else{
             res.json({success:true});
         }
+    })  
+        }
     })
+  
 })
 
 router.post('/authentication',function(req,res){
@@ -50,7 +59,7 @@ router.post('/authentication',function(req,res){
 			}
 			else{
 				
-			return res.json({success:false,msg:"auth failed"});
+			return res.json({success:false,msg:"Wrong Credentials"});
 			}
 		});
 	});
