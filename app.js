@@ -7,6 +7,7 @@ var mongoose=require('mongoose');
 var users=require('./routes/users');
 var config=require('./config/database');
 var app=express();
+const port=process.env.PORT || 8080;
 app.use(cors());
 mongoose.connect(config.database);
 
@@ -25,6 +26,6 @@ app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/users',users);
 
-app.listen(process.env.PORT || 8080,function(){
+app.listen(port,function(){
     console.log("listening")
 })
