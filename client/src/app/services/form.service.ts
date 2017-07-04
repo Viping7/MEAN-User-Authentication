@@ -10,10 +10,10 @@ user:any;
   constructor(private http:Http) {
   }
   registerUser(user){
-    return this.http.post('http://localhost:3000/users/register',user).map(response=>response.json());    
+    return this.http.post('users/register',user).map(response=>response.json());    
   }
     logIn(user){
-        return this.http.post('http://localhost:3000/users/authentication',user).map(response=>response.json());
+        return this.http.post('users/authentication',user).map(response=>response.json());
     }
     storeData(token,user){
         localStorage.setItem('id_token',token);
@@ -33,7 +33,7 @@ user:any;
         var headers=new Headers();
         this.loadToken();
         headers.append('Authorization',this.token);
-        return this.http.get('http://localhost:3000/users/profile',{headers:headers}).map(res=>res.json());
+        return this.http.get('users/profile',{headers:headers}).map(res=>res.json());
     }
     loadToken(){
         var authtoken=localStorage.getItem('id_token');

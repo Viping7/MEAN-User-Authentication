@@ -25,6 +25,6 @@ app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/users',users);
 
-app.listen(3000,function(){
+app.listen(process.env.PORT || 8080,function(){
     console.log("listening")
 })

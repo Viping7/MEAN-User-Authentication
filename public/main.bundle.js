@@ -737,10 +737,10 @@ var FormService = (function () {
         this.http = http;
     }
     FormService.prototype.registerUser = function (user) {
-        return this.http.post('http://localhost:3000/users/register', user).map(function (response) { return response.json(); });
+        return this.http.post('users/register', user).map(function (response) { return response.json(); });
     };
     FormService.prototype.logIn = function (user) {
-        return this.http.post('http://localhost:3000/users/authentication', user).map(function (response) { return response.json(); });
+        return this.http.post('users/authentication', user).map(function (response) { return response.json(); });
     };
     FormService.prototype.storeData = function (token, user) {
         localStorage.setItem('id_token', token);
@@ -760,7 +760,7 @@ var FormService = (function () {
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]();
         this.loadToken();
         headers.append('Authorization', this.token);
-        return this.http.get('http://localhost:3000/users/profile', { headers: headers }).map(function (res) { return res.json(); });
+        return this.http.get('users/profile', { headers: headers }).map(function (res) { return res.json(); });
     };
     FormService.prototype.loadToken = function () {
         var authtoken = localStorage.getItem('id_token');
