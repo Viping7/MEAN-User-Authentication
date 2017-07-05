@@ -34,7 +34,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "\n<app-navbar></app-navbar>\n<div class=\"container\">\n<flash-messages></flash-messages>\n</div>    \n<router-outlet>\n</router-outlet>"
+module.exports = "\r\n<app-navbar></app-navbar>\r\n<div class=\"container\">\r\n<flash-messages></flash-messages>\r\n</div>    \r\n<router-outlet>\r\n</router-outlet>"
 
 /***/ }),
 
@@ -90,6 +90,7 @@ AppComponent = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__services_form_service__ = __webpack_require__("../../../../../src/app/services/form.service.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__guard_auth_guard__ = __webpack_require__("../../../../../src/app/guard/auth.guard.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__routes__ = __webpack_require__("../../../../../src/app/routes.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__components_upload_upload_component__ = __webpack_require__("../../../../../src/app/components/upload/upload.component.ts");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -97,6 +98,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -128,7 +130,8 @@ AppModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_9__components_register_register_component__["a" /* RegisterComponent */],
             __WEBPACK_IMPORTED_MODULE_10__components_home_home_component__["a" /* HomeComponent */],
             __WEBPACK_IMPORTED_MODULE_11__components_dashboard_dashboard_component__["a" /* DashboardComponent */],
-            __WEBPACK_IMPORTED_MODULE_12__components_profile_profile_component__["a" /* ProfileComponent */]
+            __WEBPACK_IMPORTED_MODULE_12__components_profile_profile_component__["a" /* ProfileComponent */],
+            __WEBPACK_IMPORTED_MODULE_16__components_upload_upload_component__["a" /* UploadComponent */]
         ],
         imports: [
             __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
@@ -169,7 +172,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/dashboard/dashboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<p>\n  dashboard works!\n</p>\n"
+module.exports = "<p>\r\n  dashboard works!\r\n</p>\r\n"
 
 /***/ }),
 
@@ -230,7 +233,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/home/home.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"jumbotron text-center\">\n  <h2>MEAN Authentication App</h2>\n  <p><a class=\"btn btn-primary\" routerLink='/register' role=\"button\">Sign Up</a> <a class=\"btn btn-primary\" routerLink='/login' role=\"button\">Log In</a></p>\n</div>"
+module.exports = "<div class=\"jumbotron text-center\">\r\n  <h2>MEAN Authentication App</h2>\r\n  <p><a class=\"btn btn-primary\" routerLink='/register' role=\"button\">Sign Up</a> <a class=\"btn btn-primary\" routerLink='/login' role=\"button\">Log In</a></p>\r\n</div>"
 
 /***/ }),
 
@@ -291,7 +294,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/login/login.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container\">\n    <form [formGroup]='loginForm' (submit)='login(loginForm)'>\n \n        <div class=\"form-group\">\n            <input type=\"text\" class=\"form-control\"  formControlName='username' required placeholder=\"Username\"> \n              <div\n  class=\"error\"\n  *ngIf=\"loginForm.get('username').hasError('required') && loginForm.get('username').touched\">\n  Email is required\n</div>\n        </div>\n      \n        <div class=\"form-group\">\n            <input type=\"password\" class=\"form-control\"  formControlName='password' required placeholder='Password'> \n              <div\n  class=\"error\"\n  *ngIf=\"loginForm.get('password').hasError('required') && loginForm.get('password').touched\" >\n  Password is required\n</div>\n        </div>\n        \n        <button class='btn btn-success' type=\"submit\">Login</button>\n    </form>\n</div>\n"
+module.exports = "<div class=\"container\">\r\n    <form [formGroup]='loginForm' (submit)='login(loginForm)'>\r\n \r\n        <div class=\"form-group\">\r\n            <input type=\"text\" class=\"form-control\"  formControlName='username' required placeholder=\"Username\"> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"loginForm.get('username').hasError('required') && loginForm.get('username').touched\">\r\n  Email is required\r\n</div>\r\n        </div>\r\n      \r\n        <div class=\"form-group\">\r\n            <input type=\"password\" class=\"form-control\"  formControlName='password' required placeholder='Password'> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"loginForm.get('password').hasError('required') && loginForm.get('password').touched\" >\r\n  Password is required\r\n</div>\r\n        </div>\r\n        \r\n        <button class='btn btn-success' type=\"submit\">Login</button>\r\n    </form>\r\n</div>\r\n"
 
 /***/ }),
 
@@ -387,7 +390,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/navbar/navbar.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "\n<nav class=\"navbar navbar-default\">\n  <div class=\"container-fluid\">\n    <!-- Brand and toggle get grouped for better mobile display -->\n    <div class=\"navbar-header\">\n      <button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\">\n        <span class=\"sr-only\">Toggle navigation</span>\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n        <span class=\"icon-bar\"></span>\n      </button>\n      <a class=\"navbar-brand\">MEAN Auth App</a>\n    </div>\n\n    <!-- Collect the nav links, forms, and other content for toggling -->\n    <div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\">\n      <ul class=\"nav navbar-nav\">\n        <li routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/'>Home</a></li>\n       \n      </ul>\n      <ul class=\"nav navbar-nav navbar-right\">\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/dashboard'>Dashboard</a></li>\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/profile'>Profile</a></li>\n        <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/login'>Login</a></li>\n        <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/register'>Register</a></li>\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\" (click)='logout()'><a>Logout</a></li>\n      </ul>\n    </div><!-- /.navbar-collapse -->\n  </div><!-- /.container-fluid -->\n</nav>"
+module.exports = "\r\n<nav class=\"navbar navbar-default\">\r\n  <div class=\"container-fluid\">\r\n    <!-- Brand and toggle get grouped for better mobile display -->\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#bs-example-navbar-collapse-1\" aria-expanded=\"false\">\r\n        <span class=\"sr-only\">Toggle navigation</span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\">MEAN Auth App</a>\r\n    </div>\r\n\r\n    <!-- Collect the nav links, forms, and other content for toggling -->\r\n    <div class=\"collapse navbar-collapse\" id=\"bs-example-navbar-collapse-1\">\r\n      <ul class=\"nav navbar-nav\">\r\n        <li routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/'>Home</a></li>\r\n       \r\n      </ul>\r\n      <ul class=\"nav navbar-nav navbar-right\">\r\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/dashboard'>Dashboard</a></li>\r\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/profile'>Profile</a></li>\r\n        <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/login'>Login</a></li>\r\n        <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/register'>Register</a></li>\r\n          <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\"><a routerLink='/upload'>Upload</a></li>\r\n        <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]=\"{exact:true}\" (click)='logout()'><a>Logout</a></li>\r\n      </ul>\r\n    </div><!-- /.navbar-collapse -->\r\n  </div><!-- /.container-fluid -->\r\n</nav>"
 
 /***/ }),
 
@@ -464,7 +467,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/profile/profile.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container\">\n    <h2>{{user.name}}</h2>\n    <h4>{{user.email}}</h4>\n</div>"
+module.exports = "<div class=\"container\">\r\n    <h2>{{user.name}}</h2>\r\n    <h4>{{user.email}}</h4>\r\n    <p></p>\r\n    <img src=\"../uploads/{{user.avatar[0].originalname}}\">\r\n</div>"
 
 /***/ }),
 
@@ -497,6 +500,7 @@ var ProfileComponent = (function () {
         var _this = this;
         this.formservice.loadProfile().subscribe(function (data) {
             _this.user = data.user;
+            console.log(_this.user);
         });
     };
     return ProfileComponent;
@@ -536,7 +540,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/register/register.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container\">\n    <form name=\"register\"  [formGroup]='registerForm' (submit)='register(registerForm)'>\n        <div class=\"form-group\">\n            <input type=\"text\" class=\"form-control\" formControlName='name' required placeholder=\"Name\"> \n          <div\n  class=\"error\"\n  *ngIf=\"registerForm.get('name').hasError('required') && registerForm.get('name').touched\">\n  Name is required\n</div>\n        </div>\n        <div class=\"form-group\">\n            <input type=\"email\" class=\"form-control\"  formControlName='email' required placeholder=\"Email\"> \n              <div\n  class=\"error\"\n  *ngIf=\"registerForm.get('email').hasError('required') && registerForm.get('email').touched\">\n  Email is required\n</div>\n        </div>\n        <div class=\"form-group\">\n            <input type=\"text\" class=\"form-control\"  formControlName='username' required placeholder='Username'> \n              <div\n  class=\"error\"\n  *ngIf=\"registerForm.get('username').hasError('required') && registerForm.get('username').touched\">\n  Username is required\n</div>\n        </div>\n        <div class=\"form-group\">\n            <input type=\"password\" class=\"form-control\"  formControlName='password' required placeholder='Password'> \n              <div\n  class=\"error\"\n  *ngIf=\"registerForm.get('password').hasError('required') && registerForm.get('password').touched\" >\n  Password is required\n</div>\n        </div>\n        <div class=\"form-group\">\n            <input type=\"password\" class=\"form-control\"  formControlName='confpassword' required placeholder='Confirm Password'> \n              <div\n  class=\"error\"\n  *ngIf=\"registerForm.get('confpassword').hasError('required') && registerForm.get('confpassword').touched\" >\n  Confirm Password is required\n</div>\n        </div>\n        <button class='btn btn-success' type=\"submit\">SignUp</button>\n    </form>\n</div>\n"
+module.exports = "<div class=\"container\">\r\n    <form name=\"register\"  [formGroup]='registerForm' (submit)='register(registerForm)' enctype=\"multipart/form-data\">\r\n        <div class=\"form-group\">\r\n            <input type=\"text\" class=\"form-control\" formControlName='name' required placeholder=\"Name\"> \r\n          <div\r\n  class=\"error\"\r\n  *ngIf=\"registerForm.get('name').hasError('required') && registerForm.get('name').touched\">\r\n  Name is required\r\n</div>\r\n        </div>\r\n        <div class=\"form-group\">\r\n            <input type=\"email\" class=\"form-control\"  formControlName='email' required placeholder=\"Email\"> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"registerForm.get('email').hasError('required') && registerForm.get('email').touched\">\r\n  Email is required\r\n</div>\r\n        </div>\r\n        <div class=\"form-group\">\r\n            <input type=\"text\" class=\"form-control\"  formControlName='username' required placeholder='Username'> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"registerForm.get('username').hasError('required') && registerForm.get('username').touched\">\r\n  Username is required\r\n</div>\r\n        </div>\r\n        <div class=\"form-group\">\r\n            <input type=\"password\" class=\"form-control\"  formControlName='password' required placeholder='Password'> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"registerForm.get('password').hasError('required') && registerForm.get('password').touched\" >\r\n  Password is required\r\n</div>\r\n        </div>\r\n        <div class=\"form-group\">\r\n            <input type=\"password\" class=\"form-control\"  formControlName='confpassword' required placeholder='Confirm Password'> \r\n              <div\r\n  class=\"error\"\r\n  *ngIf=\"registerForm.get('confpassword').hasError('required') && registerForm.get('confpassword').touched\" >\r\n  Confirm Password is required\r\n</div>\r\n        </div>\r\n         <div class=\"form-group\">\r\n            <input type=\"file\" class=\"form-control\" name='avatar' required [(ngModel)]='avatar' [ngModelOptions]=\"{standalone: true}\" (change)=\"getFiles($event)\"> \r\n           \r\n        </div>\r\n        <button class='btn btn-success' type=\"submit\">SignUp</button>\r\n    </form>\r\n</div>\r\n"
 
 /***/ }),
 
@@ -575,11 +579,17 @@ var RegisterComponent = (function () {
     RegisterComponent.prototype.ngOnInit = function () {
         this.buildForm();
     };
+    RegisterComponent.prototype.getFiles = function (event) {
+        this.avatar = event.target.files;
+        this.formService.uploadPic(this.avatar).subscribe(function (data) {
+            console.log(data);
+        });
+    };
     RegisterComponent.prototype.register = function (user) {
         var _this = this;
-        console.log(user.value.confpassword, user.value.password);
         if (user.value.name && user.value.email && user.value.password && user.value.username) {
             if (user.value.password == user.value.confpassword) {
+                user.value.avatar = this.avatar;
                 delete user.value.confpassword;
                 this.formService.registerUser(user.value).subscribe(function (data) {
                     if (data.success) {
@@ -599,7 +609,7 @@ var RegisterComponent = (function () {
             email: new __WEBPACK_IMPORTED_MODULE_1__angular_forms__["d" /* FormControl */]('', __WEBPACK_IMPORTED_MODULE_1__angular_forms__["e" /* Validators */].required),
             username: new __WEBPACK_IMPORTED_MODULE_1__angular_forms__["d" /* FormControl */]('', __WEBPACK_IMPORTED_MODULE_1__angular_forms__["e" /* Validators */].required),
             password: new __WEBPACK_IMPORTED_MODULE_1__angular_forms__["d" /* FormControl */]('', __WEBPACK_IMPORTED_MODULE_1__angular_forms__["e" /* Validators */].required),
-            confpassword: new __WEBPACK_IMPORTED_MODULE_1__angular_forms__["d" /* FormControl */]('', __WEBPACK_IMPORTED_MODULE_1__angular_forms__["e" /* Validators */].required)
+            confpassword: new __WEBPACK_IMPORTED_MODULE_1__angular_forms__["d" /* FormControl */]('', __WEBPACK_IMPORTED_MODULE_1__angular_forms__["e" /* Validators */].required),
         });
     };
     return RegisterComponent;
@@ -615,6 +625,77 @@ RegisterComponent = __decorate([
 
 var _a, _b, _c, _d;
 //# sourceMappingURL=register.component.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/components/upload/upload.component.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "", ""]);
+
+// exports
+
+
+/*** EXPORTS FROM exports-loader ***/
+module.exports = module.exports.toString();
+
+/***/ }),
+
+/***/ "../../../../../src/app/components/upload/upload.component.html":
+/***/ (function(module, exports) {
+
+module.exports = "<div class=\"form-group\">\n            <input type=\"file\" class=\"form-control\" name='avatar' required [(ngModel)]='avatar' (change)=\"getFiles($event)\"> \n</div>"
+
+/***/ }),
+
+/***/ "../../../../../src/app/components/upload/upload.component.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_form_service__ = __webpack_require__("../../../../../src/app/services/form.service.ts");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UploadComponent; });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+var UploadComponent = (function () {
+    function UploadComponent(formService) {
+        this.formService = formService;
+    }
+    UploadComponent.prototype.getFiles = function (event) {
+        this.avatar = event.target.files;
+        this.formService.uploadPic(this.avatar).subscribe(function (data) {
+            console.log(data);
+        });
+    };
+    UploadComponent.prototype.ngOnInit = function () {
+    };
+    return UploadComponent;
+}());
+UploadComponent = __decorate([
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Component"])({
+        selector: 'app-upload',
+        template: __webpack_require__("../../../../../src/app/components/upload/upload.component.html"),
+        styles: [__webpack_require__("../../../../../src/app/components/upload/upload.component.css")]
+    }),
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services_form_service__["a" /* FormService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services_form_service__["a" /* FormService */]) === "function" && _a || Object])
+], UploadComponent);
+
+var _a;
+//# sourceMappingURL=upload.component.js.map
 
 /***/ }),
 
@@ -672,8 +753,10 @@ var _a, _b;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_home_home_component__ = __webpack_require__("../../../../../src/app/components/home/home.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_dashboard_dashboard_component__ = __webpack_require__("../../../../../src/app/components/dashboard/dashboard.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_profile_profile_component__ = __webpack_require__("../../../../../src/app/components/profile/profile.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__guard_auth_guard__ = __webpack_require__("../../../../../src/app/guard/auth.guard.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__components_upload_upload_component__ = __webpack_require__("../../../../../src/app/components/upload/upload.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__guard_auth_guard__ = __webpack_require__("../../../../../src/app/guard/auth.guard.ts");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return routes; });
+
 
 
 
@@ -696,12 +779,17 @@ var routes = [
     {
         path: 'profile',
         component: __WEBPACK_IMPORTED_MODULE_4__components_profile_profile_component__["a" /* ProfileComponent */],
-        canActivate: [__WEBPACK_IMPORTED_MODULE_5__guard_auth_guard__["a" /* AuthGuard */]]
+        canActivate: [__WEBPACK_IMPORTED_MODULE_6__guard_auth_guard__["a" /* AuthGuard */]]
     },
     {
         path: 'dashboard',
         component: __WEBPACK_IMPORTED_MODULE_3__components_dashboard_dashboard_component__["a" /* DashboardComponent */],
-        canActivate: [__WEBPACK_IMPORTED_MODULE_5__guard_auth_guard__["a" /* AuthGuard */]]
+        canActivate: [__WEBPACK_IMPORTED_MODULE_6__guard_auth_guard__["a" /* AuthGuard */]]
+    },
+    {
+        path: 'upload',
+        component: __WEBPACK_IMPORTED_MODULE_5__components_upload_upload_component__["a" /* UploadComponent */],
+        canActivate: [__WEBPACK_IMPORTED_MODULE_6__guard_auth_guard__["a" /* AuthGuard */]]
     }
 ];
 //# sourceMappingURL=routes.js.map
@@ -737,7 +825,14 @@ var FormService = (function () {
         this.http = http;
     }
     FormService.prototype.registerUser = function (user) {
-        return this.http.post('users/register', user).map(function (response) { return response.json(); });
+        var formData = new FormData();
+        var pic = user.avatar;
+        formData.append("name", user.name);
+        formData.append("email", user.email);
+        formData.append("username", user.username);
+        formData.append("password", user.password);
+        formData.append("avatar", pic[0], pic[0]['name']);
+        return this.http.post('users/register', formData).map(function (response) { return response.json(); });
     };
     FormService.prototype.logIn = function (user) {
         return this.http.post('users/authentication', user).map(function (response) { return response.json(); });
@@ -765,6 +860,11 @@ var FormService = (function () {
     FormService.prototype.loadToken = function () {
         var authtoken = localStorage.getItem('id_token');
         this.token = authtoken;
+    };
+    FormService.prototype.uploadPic = function (pic) {
+        var formData = new FormData();
+        formData.append("avatar", pic[0], pic[0]['name']);
+        return this.http.post('users/upload', formData).map(function (response) { return response.json(); });
     };
     return FormService;
 }());

@@ -15,6 +15,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { FormService } from './services/form.service';
 import { AuthGuard } from './guard/auth.guard';
 import {routes} from './routes';
+import { UploadComponent } from './components/upload/upload.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import {routes} from './routes';
     RegisterComponent,
     HomeComponent,
     DashboardComponent,
-    ProfileComponent
+    ProfileComponent,
+    UploadComponent
   ],
   imports: [
     BrowserModule,

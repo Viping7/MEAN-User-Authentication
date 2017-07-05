@@ -10,7 +10,14 @@ user:any;
   constructor(private http:Http) {
   }
   registerUser(user){
-    return this.http.post('users/register',user).map(response=>response.json());    
+      var formData=new FormData();
+      var pic=user.avatar;
+      formData.append("name",user.name);
+      formData.append("email",user.email);
+      formData.append("username",user.username);
+      formData.append("password",user.password);
+      formData.append("avatar", pic[0], pic[0]['name']);
+   return this.http.post('users/register',formData).map(response=>response.json());    
   }
     logIn(user){
         return this.http.post('users/authentication',user).map(response=>response.json());
@@ -38,6 +45,11 @@ user:any;
     loadToken(){
         var authtoken=localStorage.getItem('id_token');
         this.token=authtoken;
+    }
+    uploadPic(pic){
+        var formData=new FormData();
+        formData.append("avatar", pic[0], pic[0]['name']);
+        return this.http.post('users/upload',formData).map(response=>response.json());
     }
     
 }

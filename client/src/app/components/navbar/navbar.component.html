@@ -23,6 +23,7 @@
         <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]="{exact:true}"><a routerLink='/profile'>Profile</a></li>
         <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]="{exact:true}"><a routerLink='/login'>Login</a></li>
         <li *ngIf='!formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]="{exact:true}"><a routerLink='/register'>Register</a></li>
+          <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]="{exact:true}"><a routerLink='/upload'>Upload</a></li>
         <li *ngIf='formService.loggedIn()' routerLinkActive='active' [routerLinkActiveOptions]="{exact:true}" (click)='logout()'><a>Logout</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->

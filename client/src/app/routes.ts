@@ -5,6 +5,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { HomeComponent } from './components/home/home.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { UploadComponent } from './components/upload/upload.component';
 import { AuthGuard } from './guard/auth.guard';
 export const routes:Routes=[
     {
@@ -28,6 +29,11 @@ export const routes:Routes=[
     {
         path:'dashboard',
         component:DashboardComponent,
+        canActivate:[AuthGuard]
+    },
+    {
+        path:'upload',
+        component:UploadComponent,
         canActivate:[AuthGuard]
     }
     

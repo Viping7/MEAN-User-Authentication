@@ -11,18 +11,27 @@ import {Router} from '@angular/router';
 export class RegisterComponent implements OnInit {
   registerForm:FormGroup;
     message;
+    avatar;
   constructor(private fb:FormBuilder,private formService:FormService,private router:Router,private flashmessage:FlashMessagesService) { }
 
   ngOnInit() {
        this.buildForm();
     
   }
+       getFiles(event){ 
+         
+        this.avatar = event.target.files; 
+        this.formService.uploadPic(this.avatar).subscribe(data=>{
+            console.log(data);
+        })
+    }
+
 register(user){
-     console.log(user.value.confpassword,user.value.password);
     if(user.value.name&&user.value.email&&user.value.password&&user.value.username){
        if(user.value.password==user.value.confpassword){
+           user.value.avatar=this.avatar;
            delete user.value.confpassword;
-           this.formService.registerUser(user.value).subscribe(data=>{
+          this.formService.registerUser(user.value).subscribe(data=>{
                if(data.success){
                    this.flashmessage.show('You have registered successfully !!.Please wait while we redirect to login', { cssClass: 'alert-success', timeout: 4000 });
                    setTimeout(()=>{this.router.navigate(['/login'])},4100);
@@ -30,7 +39,7 @@ register(user){
                else{
                    this.flashmessage.show(data.msg, { cssClass: 'alert-danger', timeout: 1000 });
                }
-           });          
+           });     
        }
     }
 }    
@@ -40,7 +49,8 @@ register(user){
           email:new FormControl('',Validators.required),
           username:new FormControl('',Validators.required), 
           password:new FormControl('',Validators.required), 
-          confpassword:new FormControl('',Validators.required) 
+          confpassword:new FormControl('',Validators.required), 
+        //  avatar:new FormControl('',Validators.required) 
       })
   }    
 

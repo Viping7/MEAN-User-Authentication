@@ -13,7 +13,7 @@ user;
   ngOnInit() {
       this.formservice.loadProfile().subscribe(data=>{
           this.user=data.user;
-          
+          console.log(this.user);
       });
   }
 
