@@ -1,0 +1,24 @@
+<div class="container">
+    <form [formGroup]='loginForm' (submit)='login(loginForm)'>
+ 
+        <div class="form-group">
+            <input type="text" class="form-control"  formControlName='username' required placeholder="Username"> 
+              <div
+  class="error"
+  *ngIf="loginForm.get('username').hasError('required') && loginForm.get('username').touched">
+  Email is required
+</div>
+        </div>
+      
+        <div class="form-group">
+            <input type="password" class="form-control"  formControlName='password' required placeholder='Password'> 
+              <div
+  class="error"
+  *ngIf="loginForm.get('password').hasError('required') && loginForm.get('password').touched" >
+  Password is required
+</div>
+        </div>
+        
+        <button class='btn btn-success' type="submit">Login</button>
+    </form>
+</div>
