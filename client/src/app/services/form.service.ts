@@ -48,8 +48,11 @@ user:any;
     }
     uploadPic(pic){
         var formData=new FormData();
-        formData.append("avatar", pic[0], pic[0]['name']);
-        return this.http.post('users/upload',formData).map(response=>response.json());
+        formData.append("files", pic[0], pic[0]['name']);
+        return this.http.put('users/upload/username=vipin',formData).map(response=>response.json());
     }
+   /*getFile(url){
+        return this.http.get(url).map(res=>res.json());
+    }*/
     
 }

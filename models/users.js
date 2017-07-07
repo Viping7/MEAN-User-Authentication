@@ -20,6 +20,9 @@ var userSchema=mongoose.Schema({
     },
     avatar:{
         type:Object
+    },
+    file:{
+        type:Object
     }
 });
 
@@ -56,3 +59,14 @@ module.exports.comparePassword=function(password,hash,callback){
 		}
 	})
 }
+module.exports.addFiles=function(files,username,callback){
+    var data={
+        file:files
+    }
+    User.update(username,data,{},callback);
+    }
+  /*  var n_username=username.split('=')[1];
+    var n_data={
+        username:n_username
+    }
+    User.findOne(n_data);*/

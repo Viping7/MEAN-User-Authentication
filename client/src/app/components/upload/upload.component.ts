@@ -12,6 +12,10 @@ export class UploadComponent implements OnInit {
          
         this.avatar = event.target.files; 
         this.formService.uploadPic(this.avatar).subscribe(data=>{
+            /*var filepath='./uploads/'+data.user.file[0].filename;
+            this.formService.getFile(filepath).subscribe(data=>{
+                console.log(data); 
+            });*/
             console.log(data);
         })
     } 

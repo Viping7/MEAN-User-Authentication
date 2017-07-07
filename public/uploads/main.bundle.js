@@ -676,13 +676,13 @@ var UploadComponent = (function () {
         this.formService = formService;
     }
     UploadComponent.prototype.getFiles = function (event) {
+        var _this = this;
         this.avatar = event.target.files;
         this.formService.uploadPic(this.avatar).subscribe(function (data) {
-            /*var filepath='./uploads/'+data.user.file[0].filename;
-            this.formService.getFile(filepath).subscribe(data=>{
+            var filepath = './uploads/' + data.user.file[0].filename;
+            _this.formService.getFile(filepath).subscribe(function (data) {
                 console.log(data);
-            });*/
-            console.log(data);
+            });
         });
     };
     UploadComponent.prototype.ngOnInit = function () {
@@ -869,6 +869,9 @@ var FormService = (function () {
         var formData = new FormData();
         formData.append("files", pic[0], pic[0]['name']);
         return this.http.put('users/upload/username=vipin', formData).map(function (response) { return response.json(); });
+    };
+    FormService.prototype.getFile = function (url) {
+        return this.http.get(url).map(function (res) { return res.json(); });
     };
     return FormService;
 }());

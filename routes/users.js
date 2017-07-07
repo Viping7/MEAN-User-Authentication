@@ -43,8 +43,20 @@ router.post('/register',uploads.array('avatar'),function(req,res){
     })
   
 })
-router.post('/upload',function(req,res){
-   
+router.put('/upload/:username',uploads.array('files'),function(req,res){
+    var files=req.files;
+    User.addFiles(files,req.params.username,function(err,user){
+        if(err) {
+            console.log(err,'is')
+        }
+        if(user){
+            res.json({success:true,user:user});
+        }
+        else{
+            res.json({success:false});
+            console.log("error");
+        }
+    })
 })
 router.post('/authentication',function(req,res){
   var username=req.body.username;
