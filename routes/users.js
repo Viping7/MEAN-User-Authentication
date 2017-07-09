@@ -18,7 +18,7 @@ filename:function(req,file,cb){
 var uploads=multer({storage:storage});
 router.post('/register',uploads.array('avatar'),function(req,res){
     console.log(req.files);
-    let newUser=new User({
+    var newUser=new User({
         name:req.body.name,
         email:req.body.email,
         username:req.body.username,
