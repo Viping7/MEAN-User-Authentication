@@ -9,7 +9,7 @@ var config=require('./config/database');
 var multer=require('multer');
 var uploads=multer({dest:'/uploads'});
 var app=express();
-const port=process.env.PORT || 8080;
+const port=process.env.PORT;
 app.use(cors());
 mongoose.connect(config.database);
 
