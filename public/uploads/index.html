@@ -1,14 +1,32 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Client</title>
-  <base href="/">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-<script type="text/javascript" src="inline.bundle.js"></script><script type="text/javascript" src="polyfills.bundle.js"></script><script type="text/javascript" src="styles.bundle.js"></script><script type="text/javascript" src="vendor.bundle.js"></script><script type="text/javascript" src="main.bundle.js"></script></body>
+<html>
+    <head>
+      <style>
+            .ele{
+                height: 200px;
+                background:#999
+            }
+            .addHeight{
+                height:100%;
+            }
+      </style>
+    </head>
+    <body>
+        <div class="ele" style=""></div>
+        <button class="see-more">See More</button>
+        <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('.see-more').click(function(){
+                    if($('.ele').hasClass('addHeight')){
+                        $('.ele').removeClass('addHeight');
+                    }
+                    else{
+                        $('.ele').addClass('addHeight');
+                    }
+                }) 
+            });
+        </script>
+    </body>
+    
+    
 </html>

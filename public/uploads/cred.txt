@@ -1,0 +1,16 @@
+dn_admin
+hotpot95
+
+192.168.6.250
+root
+mtv@vlog
+
+cd /usr/local/mmp
+php artisan vendor:publish --force
+
+
+New VM
+
+IP: 192.168.7.26
+dn - dn@123
+root - dn36524$

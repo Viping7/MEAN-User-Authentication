@@ -16,6 +16,7 @@ import { FormService } from './services/form.service';
 import { AuthGuard } from './guard/auth.guard';
 import {routes} from './routes';
 import { UploadComponent } from './components/upload/upload.component';
+import { CodeformatterDirective } from './directives/codeformatter.directive';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { UploadComponent } from './components/upload/upload.component';
     HomeComponent,
     DashboardComponent,
     ProfileComponent,
-    UploadComponent
+    UploadComponent,
+    CodeformatterDirective
   ],
   imports: [
     BrowserModule,

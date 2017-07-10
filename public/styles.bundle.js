@@ -35,7 +35,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 exports.push([module.i, "@import url(https://bootswatch.com/darkly/bootstrap.min.css);", ""]);
 
 // module
-exports.push([module.i, "", ""]);
+exports.push([module.i, ".color{\r\n    color:darkgreen;\r\n}", ""]);
 
 // exports
 

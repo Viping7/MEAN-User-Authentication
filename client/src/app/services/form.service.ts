@@ -51,8 +51,8 @@ user:any;
         formData.append("files", pic[0], pic[0]['name']);
         return this.http.put('users/upload/username=vipin',formData).map(response=>response.json());
     }
-   /*getFile(url){
-        return this.http.get(url).map(res=>res.json());
-    }*/
+   getFile(url){
+        return this.http.get(url).map(res=>res);
+    }
     
 }

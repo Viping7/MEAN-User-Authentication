@@ -1,0 +1,2470 @@
+// var dbg=false;
+    function DialogController($scope, $mdDialog, title, content, buttons) {            
+        $scope.title = title;
+        $scope.content = content;
+        $scope.buttons = buttons;
+        
+        $scope.close = function() {
+            $mdDialog.hide('close');
+        };
+        
+        $scope.answer = function(answer) {
+            $mdDialog.hide(answer);
+        };
+    }
+    
+    // Upload to facebook social share popup controller 
+    function SocialController($scope, $mdDialog, $http, $timeout,file_url,social_media_name,thumbnail) {
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        $scope.facebook_thumbnail = thumbnail;
+        $scope.social = {};
+		
+        $scope.shareNow = function(social){             
+            var socialShare = social || {};
+            socialShare.file_url = file_url;
+            socialShare.mediaName = social_media_name;
+            socialShare.thumbnail = thumbnail;
+            $mdDialog.hide(socialShare);
+        }
+    };
+    
+    // Gif social share popup controller
+    function SocialGifController($scope, $mdDialog, $http, $timeout,file_url,social_media_name,thumbnail) {
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        if(social_media_name == 'google_plus'){
+            $scope.scheduleDate = true;
+        }else{
+            $scope.scheduleDate = false;
+        }
+		$scope.gif_thumbnail = thumbnail;
+        $scope.shareNow = function(socialGif){             
+            var socialGifShare = socialGif || {};
+            socialGifShare.file_url = file_url;
+            socialGifShare.mediaName = social_media_name;
+            socialGifShare.thumbnail = thumbnail;
+            $mdDialog.hide(socialGifShare);
+        }
+    };
+    
+    // High Res share popup controller
+    function HighResController($scope, $mdDialog, $http, $timeout,HighResData,$mdMedia) {
+        
+        $scope.isSocialMediaPluginActive = isSocialMediaPluginActive;
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        $scope.highResData = HighResData;
+        $scope.highRes = {};		
+        $scope.currentSlideImage = 0;
+        //Slick carousel settings
+        $scope.slickConfig = {
+            enabled: true,
+            draggable: true,
+            arrows: true,
+            //centerMode: true,
+            adaptiveHeight: true,
+            prevArrow:"<button type='button' class='slick-prev'><i class='fa fa-chevron-left'></i></button>",
+            nextArrow:"<button type='button' class='slick-next'><i class='fa fa-chevron-right'></i></button>",
+            method: {},
+            event: {
+                afterChange: function (event, slick, currentSlide, nextSlide) {
+                    $scope.currentSlideImage = currentSlide;
+                }
+            }
+        };
+		$scope.highRes.shareText = "Image of " + callsign + " at " + $scope.highResData[$scope.currentSlideImage].datetime + hostName;
+        $scope.shareNow = function(shareHighRes,social_media_name) {
+            var HighRes = shareHighRes || {};
+            HighRes.socialMediaName = social_media_name;
+            HighRes.file_url = $scope.highResData[$scope.currentSlideImage].link;
+            HighRes.attachment_path = $scope.highResData[$scope.currentSlideImage].frame_path;
+            $mdDialog.hide(HighRes);
+        };
+		// Show High Res email popup                
+                $scope.showHighResEmailPopUp = function(shareHighRes,ev) {      
+                    $scope.EmailhighRes = shareHighRes || {};
+					$scope.EmailhighRes.shareText = shareHighRes.shareText;
+					$scope.EmailhighRes.file_url = $scope.highResData[$scope.currentSlideImage].link;
+					$scope.EmailhighRes.attachment_path = $scope.highResData[$scope.currentSlideImage].frame_path;
+					$mdDialog.cancel($scope.EmailhighRes);
+                    $mdDialog.show({
+                                controller: HighResEmailController,
+                                preserveScope:true,
+                                templateUrl: editorEmailTplPath,
+                                parent: angular.element(document.body),
+                                targetEvent: ev,
+                                clickOutsideToClose:true,
+                                fullscreen: $mdMedia('sm') || $mdMedia('xs'),
+                                bindToController:true,
+                                locals:{
+                                    EmailHighResData:$scope.EmailhighRes,
+                                }
+                            })
+                            .then(function(emailData) {
+								$scope.email = emailData || {};
+                                //Share high res image through email
+								if(typeof $scope.email.fromEmail == "undefined") {
+									$scope.mailError = "Please enter FromEmail";
+									return;
+								}
+								if(typeof  $scope.email.toEmail == "undefined") {
+									$scope.mailError = "Please enter ToEmail";
+									return;
+								}
+								if(typeof  $scope.email.subject == "undefined") {
+									$scope.mailError = "Please enter subject";
+									return;
+								}
+								if(typeof  $scope.email.message == "undefined") {
+									$scope.mailError = "Please enter message";
+									return;
+								}
+
+								
+								
+								var message = $scope.email.message + "<br><img src=" + $scope.email.attachment_path + " />";
+								var postData = {
+									'from_email':$scope.email.fromEmail,
+									'to_email':$scope.email.toEmail,
+									'email_subject':$scope.email.subject,
+									'email_message':message,
+									'host_name':hostName,
+								};
+								
+								$scope.mailSuccess = "Sending mail....";
+								$scope.mailError = '';
+								
+								$http({
+								  method: 'POST',
+								  url: sendMailAjaxApiPath,
+								  data: postData
+								})
+								.then(function successCallback(response) {
+									$scope.mailSuccess = response.data.data.messages[0];
+								}, function errorCallback(response) {
+									$scope.mailError = 'Failed to send mail';
+								});
+                            }, function() {
+                                $scope.status = 'You cancelled the dialog.';
+                    });
+                    
+                };
+    };
+  
+    // High Res send email popup controller
+    function HighResEmailController($scope, $mdDialog, $http, $timeout,EmailHighResData) {		
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        $scope.emailData = {};
+		$scope.emailData.subject = EmailHighResData.shareText;
+		$scope.emailData.message = EmailHighResData.shareText + " " + EmailHighResData.file_url;
+		$scope.emailData.attachment_path = EmailHighResData.file_url;
+        //$scope.currentSlideImage = 0;		
+        //Slick carousel settings
+       // $scope.slickConfig = {
+          //  enabled: true,
+          //  draggable: true,
+          //  arrows: true,
+            //centerMode: true,
+          //  adaptiveHeight: true,
+          //  prevArrow:"<button type='button' class='slick-prev'><i class='fa fa-chevron-left'></i></button>",
+         //   nextArrow:"<button type='button' class='slick-next'><i class='fa fa-chevron-right'></i></button>",
+         //   method: {},
+          //  event: {
+         //       afterChange: function (event, slick, currentSlide, nextSlide) {
+          //          $scope.currentSlideImage = currentSlide;
+          //          
+          //      }
+         //   }
+        //};
+        $scope.emailNow = function(emailData) {
+            $scope.emailData = emailData || {};
+			
+			if(typeof $scope.emailData.fromEmail == 'undefined' || typeof $scope.emailData.toEmail == 'undefined'){
+				$scope.emailError = "From Email and To Email are required.";
+			}else{
+				 $mdDialog.hide($scope.emailData);
+			}
+           
+        }
+    };
+	// Clip send email popup controller
+    function HighClipEmailController($scope, $mdDialog, $http, $timeout,EmailClipData) {
+        $scope.socialPopText = "Share Clip";		
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        $scope.emailData = {};
+		$scope.emailData.subject = "";
+		$scope.emailData.message = "";
+		$scope.emailData.attachment_path = EmailClipData.file_url;
+        //$scope.currentSlideImage = 0;		
+        //Slick carousel settings
+       // $scope.slickConfig = {
+          //  enabled: true,
+          //  draggable: true,
+          //  arrows: true,
+            //centerMode: true,
+          //  adaptiveHeight: true,
+          //  prevArrow:"<button type='button' class='slick-prev'><i class='fa fa-chevron-left'></i></button>",
+         //   nextArrow:"<button type='button' class='slick-next'><i class='fa fa-chevron-right'></i></button>",
+         //   method: {},
+          //  event: {
+         //       afterChange: function (event, slick, currentSlide, nextSlide) {
+          //          $scope.currentSlideImage = currentSlide;
+          //          
+          //      }
+         //   }
+        //};
+        $scope.emailNow = function(emailData) {
+            $scope.emailData = emailData || {};
+			
+			if(typeof $scope.emailData.fromEmail == 'undefined' || typeof $scope.emailData.toEmail == 'undefined'){
+				$scope.emailError = "From Email and To Email are required.";
+			}else{
+				 $mdDialog.hide($scope.emailData);
+			}
+           
+        }
+    };
+    // end of Upload to facebook social share popup controller
+  
+    //Export popup controller
+    function ExportController($scope, $mdDialog, $http, $timeout,thumbnail,frameThumbnailDateTime) {
+        $scope.selectedTags = [];
+        $scope.selectedChannels = [];
+        $scope.cutClipError = "";
+        $scope.cutClipSuccess = "";
+        $scope.ftp_settings = ftp_settings;
+        $scope.encoding_settings = encoding_settings;
+        $scope.nsf_profiles = nsf_profiles;
+        $scope.mediaFormat = "HLS";
+        $scope.frameThumbnail = thumbnail;
+        $scope.frameThumbnailDate = frameThumbnailDateTime;
+        $scope.removeThumbnail = function(){
+                        $scope.frameThumbnail = "";
+                        $scope.frameThumbnailDate = "";
+                        $('.framethumbnail-btn').removeClass('active');
+        };
+        $scope.hide = function() {
+            $mdDialog.hide();
+        };
+        $scope.gif = {};
+        $scope.clip = {};
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        };
+        $scope.loadPlaylist = function(query) {
+            return $scope.uniquePlaylists.filter(function(playlist) {
+                return playlist.toLowerCase().indexOf(query.toLowerCase()) != -1;
+            });
+        };
+        $scope.enableFtpOptions = false;
+        $scope.$watch('clip.ftp', function() {
+            if($scope.clip.ftp) {
+                $scope.enableFtpOptions = true;
+            } else {
+                $scope.enableFtpOptions = false;
+            }
+        });
+        $scope.enableNsfOptions = false;
+        $scope.$watch('clip.nsf', function() {
+            if($scope.clip.nsf) {
+                $scope.enableNsfOptions = true;
+            } else {
+                $scope.enableNsfOptions = false;
+            }
+        });
+        $scope.enableMailOptions = false;
+        $scope.$watch('clip.mailalink', function() {
+            if($scope.clip.mailalink || $scope.clip.mailasattachment) {
+                $scope.enableMailOptions = true;
+            } else {
+                $scope.enableMailOptions = false;
+            }
+        });
+        $scope.$watch('clip.mailasattachment', function() {
+            if($scope.clip.mailalink || $scope.clip.mailasattachment) {
+                $scope.enableMailOptions = true;
+            } else {
+                $scope.enableMailOptions = false;
+            }
+        });
+        var copy = false;
+        $scope.$watch('mediaFormat', function() {
+            $scope.enableSending = true;
+            $scope.gifVarEnable = false;
+            $scope.enableBurnin = true;
+            var encoding_setting_details = $.grep($scope.encoding_settings, function(e){ return e.profile_name == $scope.mediaFormat; });
+            if($scope.mediaFormat != 'Gif' && encoding_setting_details){
+               copy = encoding_setting_details[0]['copy'];
+            }
+            if($scope.mediaFormat == 'Gif')  {
+                $scope.gifVarEnable = true;
+                $scope.enableSending = false;
+            }
+            if($scope.mediaFormat == 'Gif' || $scope.mediaFormat == 'Audio'  || $scope.mediaFormat == 'HLS-AUDIO' || copy)  {
+                $scope.enableBurnin = false;
+            }
+        });
+        $scope.tagAdded = function(tag) {
+            $scope.selectedTags.push(tag.tag);
+        };
+        $scope.tagRemoved = function(tag) {
+            $scope.selectedTags.splice(tag.tag,1);
+        };
+        $scope.updateChannelSelection = function(channelId) {
+            if($scope.selectedChannels.indexOf(channelId) < 0) {
+                $scope.selectedChannels.push(channelId)
+            } else {
+                $scope.selectedChannels.splice($scope.selectedChannels.indexOf(channelId),1)
+            }
+        };
+        $scope.exportRecording = function() {
+            $scope.cutClipError = "";
+            $scope.gifInfo = "";
+			 $scope.cancelling_clip = false;
+			$scope.cancel_show = false;
+			$scope.clip_cancelled = false;
+			$scope.completed_progress_show = false;
+            if($scope.setOutTime.getTime() <= $scope.setInTime.getTime()) {
+                $scope.cutClipError = "End time cannot be less than or same as start time";
+                return;
+            }
+            if($scope.clip.mailalink || $scope.clip.mailasattachment) {
+                if(typeof $scope.mail.from_email == 'undefined' || typeof $scope.mail.to_email == 'undefined' || typeof $scope.mail.email_subject == 'undefined' || typeof $scope.mail.email_message == 'undefined') {
+                    $scope.cutClipError = "Please provide mail details";
+                    return;
+                }
+            }
+            if($scope.clip.ftp && !$scope.ftp_profile) {
+                $scope.cutClipError = "Please select a ftp profile";
+                return;
+            }
+            if($scope.clip.nsf && !$scope.nsf_profile) {
+                $scope.cutClipError = "Please select a nsf profile";
+                return;
+            }
+            postData = {};
+            tags = "";
+            for(eachTag in $scope.addedChannelTags) {
+                tags += $scope.addedChannelTags[eachTag].tag + ",";
+            }
+            if(!tags) {
+                tags = "default";
+            }
+            eachChannelDetails = {};
+            // eachChannelDetails['rec_id'] = $scope.recId;
+            eachChannelDetails['from_editor'] = true;
+            eachChannelDetails['host_name'] = host_name;
+            eachChannelDetails['channel_id'] = channel_id;
+            eachChannelDetails['clip_name'] = $scope.clipName;
+            eachChannelDetails['clip_type'] = $scope.mediaFormat;
+            if($scope.clip.mailalink || $scope.clip.mailasattachment) {
+                eachChannelDetails['send_as_email'] = 1;                
+                if($scope.clip.mailalink == 'mailasattachment') {
+                    eachChannelDetails['media_as_attachment'] = 1;
+                }else if($scope.clip.mailalink == 'mailalink'){
+					eachChannelDetails['media_as_attachment'] = 0;
+				}
+                eachChannelDetails['from_email'] = $scope.mail.from_email;
+                eachChannelDetails['to_email'] = $scope.mail.to_email;
+                eachChannelDetails['email_subject'] = $scope.mail.email_subject;
+                eachChannelDetails['email_message'] = $scope.mail.email_message;
+            }
+            if($scope.clip.ftp) {
+                eachChannelDetails['ftp'] = $scope.ftp_profile;
+            }
+            if($scope.clip.nsf) {
+                eachChannelDetails['nsf'] = $scope.nsf_profile;
+            }
+            
+            if($scope.mediaFormat.match(/iso/i)){
+                eachChannelDetails['iso_status'] = "0";
+            }
+            
+            if(eachChannelDetails['clip_type'] == "Gif") {
+                genGifDetails = {};
+                genGifDetails.rec_id = $scope.recId;
+                genGifDetails.start_date_time = DateFormat.format.date($scope.setInTime , "yyyyMMddHHmmss");
+                genGifDetails.end_date_time = DateFormat.format.date($scope.setOutTime , "yyyyMMddHHmmss");
+                genGifDetails.resolution = $scope.gif.gifResolution;
+                genGifDetails.no_of_frames = $scope.gif.gifImagesPerSec;
+                genGifDetails.host_name = host_name;
+                $scope.gifInfo = "This might take time. Please close the dialog box if it is taking too much time and come back later.";
+                // Creating Gif Image... 
+                $http({
+                  method: 'POST',
+                  url: $scope.createGifAjaxApiPath,
+                  data: genGifDetails
+                })
+                .then(function successCallback(response) {
+                    $scope.cutClipSuccess = "Cutclip job added successfully. ";
+                    $timeout(function(){
+                        $mdDialog.hide();
+                    },1000);
+                });
+                return;
+            }
+            eachChannelDetails['start_date_time'] = DateFormat.format.date($scope.setInTime , "yyyyMMddHHmmss");
+            eachChannelDetails['end_date_time'] = DateFormat.format.date($scope.setOutTime , "yyyyMMddHHmmss");
+            eachChannelDetails['playlist'] = tags;
+            eachChannelDetails['start_frame_no'] = $scope.setInFrame;
+            eachChannelDetails['end_frame_no'] = $scope.setOutFrame;
+            eachChannelDetails['burn_loudness'] = 0;
+            eachChannelDetails['burn_captions'] = 0;
+            eachChannelDetails['burn_time_code'] = 0;
+            eachChannelDetails['burn_nave'] = 0;
+            eachChannelDetails['annotation'] = "";
+            eachChannelDetails['clip_attachments'] = "";
+            if(typeof $scope.clip.burnInLoudness != 'undefined') {
+                eachChannelDetails['burn_loudness'] = 1;
+            }
+            if(typeof $scope.clip.burnInCaptions != 'undefined') {
+                eachChannelDetails['burn_captions'] = 1;
+                eachChannelDetails['cap_type'] = $scope.recId + ".txt";
+            }
+            if(typeof $scope.clip.burnInTimecode != 'undefined') {
+                eachChannelDetails['burn_time_code'] = 1;
+            }
+            if(typeof $scope.clip.burnInNielsenCodes != 'undefined') {
+                eachChannelDetails['burn_nave'] = 1;
+            }
+            if(typeof $scope.clip.clipAnnotation != 'undefined') {
+                eachChannelDetails['annotation'] = $scope.clip.clipAnnotation;
+            }
+            postData[0] = eachChannelDetails;
+            var cutclipData = {};
+            cutclipData.cutclip = postData;
+            // Creating Cut Clip... 
+            $http({
+              method: 'POST',
+              url: $scope.createCutClipAjaxApiPath,
+              data: cutclipData
+            })
+            .then(function successCallback(response) {
+			
+                $scope.cutClipSuccess = "Cutclip job added successfully. ";
+				$scope.note='Note: You can close this dialog and download generated clip from Clips tab or Clips page once the clip is ready';
+				$scope.success_clip=true;
+                $scope.$watch('files.length',function(newVal,oldVal){
+                    var formData = new FormData();
+                    angular.forEach($scope.files,function(obj){
+                        if(!obj.isRemote){
+                            formData.append('files[]', obj.lfFile);
+                        }
+                    });
+                    formData.append('clip_info_id', response.data.data[0].job_id);
+					console.log(response.data.data[0].job_id);
+                    formData.append('host_name', host_name);
+                    formData.append('ftp_id', eachChannelDetails['ftp']);
+                    formData.append('clip_thumbnail', $scope.frameThumbnail);
+                    $http.post(uploadFileAjaxApiPath, formData, {
+                        transformRequest: angular.identity,
+                        headers: {'Content-Type': undefined}
+                    }).then(function(result){
+						
+						timeout_interval=setInterval(function(){$scope.getCurrentProgressClip(response.data.data[0].job_id)},1000);
+                    },function(err){
+                        //console.log(err);
+                    });
+                });
+				$('.export-form').slideUp(500);
+				//setInterval(function(){$scope.getProgressClips()},1000);
+            });
+        };
+    };
+    
+
+        function insertIntoArray(arr, index, arrayToInsert) {
+            Array.prototype.splice.apply(arr, [index, 0].concat(arrayToInsert));
+        }
+
+        commonModules.push("mediaPlayer");
+        commonModules.push("media");
+        commonModules.push("slickCarousel");     
+        commonModules.push("iosDblclick");
+		commonModules.push('angularSpinner');
+        var mmpAppOverRide = angular.module('MMP', commonModules);
+        
+        mmpAppOverRide.filter('removeSpaces', [function () {
+            return function (string) {
+                if (!angular.isString(string)) {
+                    return string;
+                }
+                string = string.replace(/[\s:-]/g, '');
+                return string.replace(/\//g, '');
+            };
+        }]);
+        mmpAppOverRide.filter('showAfterSpace', [function () {
+            return function (string) {
+                if (!angular.isString(string)) {
+                    return string;
+                }
+                return string.substr(string.indexOf(' ') + 1);
+            };
+        }]);
+		
+      mmpAppOverRide.filter('removePercent', [function () {
+        return function (string) {
+            if (!angular.isString(string)) {
+                return string;
+            }
+            string = string.replace(/[\%:-]/g, '');
+            return string.replace(/\//g, '');
+        };
+        }]);
+		mmpAppOverRide.filter('textReplace', function() {
+		   return function(obj) {
+			  return obj.replace("service","S");
+		   }    
+		});
+        mmpAppOverRide.directive('mmpKeyCode', function() {
+            return {
+              restrict: 'A',
+              link: function($scope, $element, $attrs) {
+                $element.bind("keypress", function(event) {
+                  var keyCode = event.which || event.keyCode;
+                  if (keyCode == $attrs.code) {
+                    $scope.$apply(function() {
+                      $scope.$eval($attrs.mmpKeyCode, {$event: event});                  
+                    });
+
+                  }
+                });
+              }
+            };
+        });   
+
+        var timeToSecs = function(time) {
+            var ts = time.split(':');
+            return parseInt(ts[0]) * 60 * 60 + parseInt(ts[1]) * 60 + parseInt(ts[2]);
+        };
+		commonModules.push('lfNgMdFileInput');
+        mmpAppOverRide.controller('editorController', [ '$scope','$timeout', '$http', '$interval' , 'media' ,'$mdDialog','$mdMedia', function($scope, $timeout, $http, $interval, media ,$mdDialog, $mdMedia) {
+            $scope.isSocialMediaPluginActive = isSocialMediaPluginActive;
+            $scope.callsign = callsign;
+            $scope.chanId = chanId;
+            $scope.hostName = hostName;
+            $scope.keyword = keyword;
+            $scope.recId = recId;
+            $scope.frame_rec_id = "";
+            $scope.metadataFullContent = {};
+            $scope.annotationForm = {};
+            $scope.metadataUniqId = $scope.chanId + "-" + $scope.hostName;
+			$scope.hideSpinner = true;
+			/*$scope.isLoading = function () {
+							return $http.pendingRequests.length > 0;
+						};
+
+			$scope.$watch($scope.isLoading, function (loading)
+			{
+				$scope.hideSpinner = loading;
+			});	*/
+		
+            $scope.recordingTags = recordingTags.split(",").filter(Boolean);
+            $scope.loadPlaylist = function(query) {
+                return $scope.uniquePlaylists.filter(function(playlist) {
+                    return playlist.toLowerCase().indexOf(query.toLowerCase()) != -1;
+                });
+            };
+            $scope.allRecordings = allRecordings;
+            $scope.recIndex = $scope.allRecordings.indexOf($scope.recId);
+            
+            // Ajax Api Paths
+            $scope.metadataAjaxApiPath = metadataAjaxApiPath;
+            $scope.addAnnotationAjaxApiPath = addAnnotationAjaxApiPath;
+            $scope.viewframesAjaxApiPath = viewframesAjaxApiPath;
+            $scope.socailMediaAjaxApiPath = socailMediaAjaxApiPath;
+            $scope.getClipsAjaxApiPath = getClipsAjaxApiPath;
+            $scope.getGifsAjaxApiPath = getGifsAjaxApiPath;
+            $scope.getPlaylistsAjaxApiPath = getPlaylistsAjaxApiPath;
+            $scope.createCutClipAjaxApiPath = createCutClipAjaxApiPath;
+            $scope.createGifAjaxApiPath = createGifAjaxApiPath;
+            
+            // Template URL Paths
+            $scope.editorEmailTplPath = editorEmailTplPath;
+            $scope.highResTplPath = highResTplPath;
+            $scope.dialogTplPath = dialogTplPath;
+            $scope.socialTplPath = socialTplPath;
+            $scope.exportTplPath = exportTplPath;
+            
+            media.setMediaMetadataAjaxApiPath($scope.metadataAjaxApiPath);
+            $scope.metaDataDetails = {};
+            $scope.metaDataDetails.host_name = $scope.hostName;
+            $scope.metaDataDetails.rec_id = $scope.recId;
+            $scope.metaDataDetails.metadata_type = "nielsen_ratings,asrun,traffic,alerts,commercials,discrepancy_report,cuetriggers,lkfs_24x7,annotation,captions,loudness,navecodes";
+            
+            $scope.metadata = {};						
+			var getMetadataInterval = $interval(function(){
+				$scope.metadataRs = media.getMediaMetadataByRecId($scope.metaDataDetails);				
+				$scope.metadataRs.then(function(result) {
+					if(result && result.data && result.data.data) {
+						$scope.hideSpinner = false;
+						if(result.data.data.captions.length == 0){							
+							$scope.showCaptionsData = false;
+						}
+						$scope.metadata = result.data.data;
+						$scope.setMetaData();
+                        if($scope.reloadCaptions) {
+                            $scope.loadCaptions();
+                        }
+                        if($scope.reloadAnnotations) {							
+                            $scope.loadAnnotations();
+                        }
+                        if($scope.reloadNaveCode) {
+                            $scope.loadNaveCode();
+                        }
+					}
+				});
+                if(isLive == 0) {
+                    $interval.cancel(getMetadataInterval);
+                }
+			}, 5000);
+                
+           // $scope.displayAnnotationAdding = false;
+            $scope.showAnnotaionTimeStamp = function() {
+                $scope.playerTimeForAnnotationTmp = new Date($scope.seekBarStartDateTime.getTime() + $scope.playHeadTime * 1000);
+                $scope.playerTimeForAnnotation = DateFormat.format.date($scope.playerTimeForAnnotationTmp , "yyyy-MM-dd HH:mm:ss");
+                //$scope.displayAnnotationAdding = $scope.displayAnnotationAdding === false ? true : false;
+            };
+            
+            $scope.addAnnotation = function(keyEvent) {
+			if(keyEvent.which === 13 && $scope.annotationForm.annotationInTab !== ""){				
+                annotationDetails = {};
+                var tmpts = DateFormat.format.date($scope.playerTimeForAnnotationTmp , "yyyy-MM-dd HH:mm:ss");
+                annotationDetails.rec_id = $scope.recId;
+                annotationDetails.start_date_time = DateFormat.format.date($scope.playerTimeForAnnotationTmp , "yyyyMMddHHmmss");
+                annotationDetails.end_date_time = DateFormat.format.date($scope.playerTimeForAnnotationTmp , "yyyyMMddHHmmss");
+                annotationDetails.annotation = $scope.annotationForm.annotationInTab;
+                annotationDetails.host_name = host_name;
+                //$scope.disbaleAnnotationInput = true;
+                $("#add-annotation-input").prop( "disabled", true );
+                $scope.togglePostAnnotationLoaderIcon = true;
+                // Adding Annotation
+                $http({
+                    method: 'POST',
+                    url: $scope.addAnnotationAjaxApiPath,
+                    data: annotationDetails
+                })
+                .then(function successCallback(response) {
+                    $scope.annotationSuccess = "Annotation added successfully.";                    
+                    var newAnnotation = {
+                        time: tmpts, 
+                        annotation: $scope.annotationForm.annotationInTab
+                    };
+                    $scope.togglePostAnnotationLoaderIcon = false;
+                    $scope.annotations.push(newAnnotation);
+                    //$scope.disbaleAnnotationInput = false;
+                    $("#add-annotation-input").prop( "disabled", false );
+                    $('#add-annotation-input').val("");
+                    $("#add-annotation-input").focus();
+                    $('#annotations-container').scrollTo('#add-annotation-input');
+					$scope.annotationForm.annotationInTab = "";
+                });				
+			};
+			
+            };
+            
+            // Adding Recording Tags
+            $scope.addOrRemoveRecordingTags = function(tag) {
+                recordingTags = "";
+                for(eachTag in $scope.recordingTags) {
+                    recordingTags += $scope.recordingTags[eachTag].text + ",";
+                }
+                tagDetails = {};
+                tagDetails['host_name'] = hostName;
+                tagDetails['recording_id'] = recId;
+                tagDetails['tags'] = recordingTags.replace(/,\s*$/, "");               
+                $http({
+                    method: 'POST',
+                    url: addTagsToTheRecordingAjaxApiPath,
+                    data: tagDetails
+                })
+                .then(function successCallback(response) {
+                });
+            }
+            
+            $scope.navecodes = {};
+            $scope.reloadNaveCode = false;
+			$scope.showNACData = false;
+            $scope.loadNaveCode = function() {
+				$scope.hideSpinner = false;
+                if($scope.navecodesLoaded) return false;
+                if($scope.metadata.navecodes) {
+                    $scope.navecodes = $scope.metadata.navecodes;
+                    $scope.navecodesLoaded = true;
+					$scope.showNACData = true;
+                } else {
+                    $scope.reloadNaveCode = true;
+                }
+            };
+            $scope.loudnessGrpLoaded = false;
+            $scope.asRunLoaded = false;
+            $scope.trafficDataLoaded = false;
+            $scope.cuetriggersLoaded = false;
+            $scope.navecodesLoaded = false;
+            $scope.annotationsLoaded = false;
+            $scope.ratingsLoaded = false;
+            
+            var clipProgress;
+            $scope.setMetaData = function() {
+                
+                for(metadataType in $scope.metadata ) {
+                    if (metadataType == 'loudness') {
+                        if ($scope.metadata.loudness && $scope.metadata.loudness.LN) {
+                            if(!$scope.metadataFullContent[$scope.metadataUniqId]) {
+                                $scope.metadataFullContent[$scope.metadataUniqId] = {};
+                            }
+                            if(!$scope.metadataFullContent[$scope.metadataUniqId].loudness) {
+                                $scope.metadataFullContent[$scope.metadataUniqId].loudness = {};
+                            }
+                            $scope.metadataFullContent[$scope.metadataUniqId].loudness.SR = $scope.metadata.loudness.SR;
+                            $scope.metadataFullContent[$scope.metadataUniqId].loudness.DN = $scope.metadata.loudness.DN;
+                            if (!$scope.metadataFullContent[$scope.metadataUniqId].loudness.LN){
+                                $scope.metadataFullContent[$scope.metadataUniqId].loudness.LN =  {};
+                            }
+                            for(loudnessDateTime in $scope.metadata.loudness.LN ) {
+                                if(!$scope.metadataFullContent[$scope.metadataUniqId].loudness.LN[loudnessDateTime]) {
+                                    $scope.metadataFullContent[$scope.metadataUniqId].loudness.LN[loudnessDateTime] = $scope.metadata.loudness.LN[loudnessDateTime];
+                                }
+                            }
+                        }
+                    }
+                    if (metadataType == 'navecodes') {
+                        if(!$scope.metadataFullContent[$scope.metadataUniqId]) {
+                            $scope.metadataFullContent[$scope.metadataUniqId] = {};
+                        }
+                        $scope.metadataFullContent[$scope.metadataUniqId].navecodes = $scope.metadata.navecodes;
+                    }
+                    if (metadataType == 'nielsen_ratings') {
+                        previousDateTime = "";
+                        previousValue = "";
+                        if(!$scope.metadataFullContent[$scope.metadataUniqId]) {
+                            $scope.metadataFullContent[$scope.metadataUniqId] = {};
+                        }
+                        if(!$scope.metadataFullContent[$scope.metadataUniqId].ratings) {
+                            $scope.metadataFullContent[$scope.metadataUniqId].ratings = {};
+                        }
+                        for(ratingsIndex in $scope.metadata.nielsen_ratings) {
+                            ratingsTmpDateTimeArr = $scope.metadata.nielsen_ratings[ratingsIndex].split(" ");
+                            currentRDateTime = new Date(ratingsTmpDateTimeArr[0].replaceAllRegExp('-','/') + " " + ratingsTmpDateTimeArr[1]);
+                            currentRValue = ratingsTmpDateTimeArr[2];
+                            if(!previousDateTime) {
+                                previousDateTime = new Date(currentRDateTime);
+                            }
+                            previousValue = currentRValue;
+                            while(previousDateTime <= currentRDateTime) {
+                                fmtdpreviousDateTime = DateFormat.format.date(previousDateTime , "yyyy-MM-dd HH:mm:ss");
+                                previousDateTime.setSeconds(previousDateTime.getSeconds() + 1);
+                                if(!$scope.metadataFullContent[$scope.metadataUniqId].ratings[fmtdpreviousDateTime]) {
+                                    $scope.metadataFullContent[$scope.metadataUniqId].ratings[fmtdpreviousDateTime] = previousValue;
+                                }
+                            }
+                        }
+                    }
+                    if (metadataType == 'captions') {
+                        if ($scope.metadata.captions) {
+                            if(!$scope.metadataFullContent[$scope.metadataUniqId]) {
+                                $scope.metadataFullContent[$scope.metadataUniqId] = {};
+                            }
+                            if(!$scope.metadataFullContent[$scope.metadataUniqId].captions) {
+                                $scope.metadataFullContent[$scope.metadataUniqId].captions = {};
+                            }
+                            for(capType in $scope.metadata.captions ) {
+                                if (!$scope.metadataFullContent[$scope.metadataUniqId].captions[capType.toLowerCase()]){
+                                    $scope.metadataFullContent[$scope.metadataUniqId].captions[capType.toLowerCase()] =  {};
+                                }
+                                for(capTime in $scope.metadata.captions[capType]) {
+                                    $scope.metadataFullContent[$scope.metadataUniqId].captions[capType.toLowerCase()][capTime] = $scope.metadata.captions[capType][capTime];
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+            $scope.seekBarStartDateTime = seekBarStartDateTime;
+            $scope.seekBarEndDateTime = seekBarEndDateTime;
+            $scope.formattedRecStartDateTime = DateFormat.format.date($scope.seekBarStartDateTime , "yyyyMMddHHmmss");
+            $scope.formattedRecEndDateTime = DateFormat.format.date(new Date($scope.seekBarEndDateTime.getTime() - 1000) , "yyyyMMddHHmmss");
+            $scope.recDuration = ($scope.seekBarEndDateTime.getTime() - $scope.seekBarStartDateTime.getTime()) / 1000;
+            $scope.formattedDuration  = tmpTime = moment().startOf('day').seconds($scope.recDuration).format('H')  + " Hrs " + 
+                            moment().startOf('day').seconds($scope.recDuration).format('mm')  + " Mins" ;
+            
+            $scope.formattedRecDate = DateFormat.format.date($scope.seekBarStartDateTime , "E, MMM dd, yyyy");
+            $scope.formattedRecTime = DateFormat.format.date($scope.seekBarStartDateTime , "hh:mm a");
+            $scope.playType = playType;
+            $scope.clipStart = clipStart;
+            $scope.clipEnd = clipEnd;
+            $scope.offset = offset;
+            $scope.videoPlayFrom = false;
+            $scope.videoPlayTill = false;
+            $scope.seekOffSet = 0;
+            if($scope.offset) {
+                $scope.seekOffSet = timeToSecs($scope.offset);
+            }
+            if($scope.playType == 'clip') {
+                $scope.videoPlayFrom = (new Date($scope.clipStart).getTime() - $scope.seekBarStartDateTime.getTime()) / 1000;
+                $scope.videoPlayTill = (new Date($scope.clipEnd).getTime() - $scope.seekBarStartDateTime.getTime()) / 1000;
+            }
+            
+            /**
+            *** Loading Metadata content Starts here...
+            **/
+                // Caption, loudness, annotations
+                // $scope.captions = metadata.captions;
+                $scope.captions = [];
+                $scope.annotations = [];
+                $scope.captionsTabs = [];
+                $scope.framesData = [];
+                $scope.captionsData = [];
+                
+                $scope.setCaptions = function (tabTitle,captionData) {
+                    $(".captions-tabs").removeClass("md-primary");
+                    $("#captions-tab-" + tabTitle).addClass("md-primary");
+                    $scope.captionsData = captionData;
+                };
+
+                // Get captions data
+                $scope.captionsLoaded = false;
+                $scope.reloadCaptions = false;
+                $scope.reloadAnnotations = false;
+                $scope.captionsTab = 0;
+                $scope.showCaptionsData = true;
+                $scope.loadCaptions = function() {					
+                    $scope.captionsTabs = [];
+                    if($scope.captionsLoaded) {$scope.hideSpinner = false; }
+                    $scope.captionsTab = $scope.tabSelected;
+                    if(typeof $scope.metadata.captions == 'undefined') {
+                        $scope.reloadCaptions = true;
+                    }
+                    _.forOwn($scope.metadata.captions, function (captionData, captionName) {						
+                        var individualCaption = {
+                            title: captionName
+                            , captionData: captionData
+                        };
+                        $scope.captionsTabs.push(individualCaption);
+                        //if (!$scope.captionsLoaded) {
+                            $scope.setCaptions(individualCaption.title,individualCaption.captionData);
+                            $scope.captionsLoaded = true;
+                        //}
+                    });
+                };
+                
+                $scope.negativeIndex = -1;
+                $scope.positiveIndex = 1;
+                $scope.showFramesData = true;
+                $scope.framesTabStatus = false;
+                $scope.frames = [];
+                $scope.loadFrames = function (index){
+                    if(index != 0){
+                       $scope.framesAutoScroll = false;
+                    }
+                     // $scope.hideSpinner = true;
+                    if (!$scope.framesTabStatus) {
+                        $scope.framesTab = $scope.tabSelected;
+                        $scope.framesTabStatus = true;
+                    }
+                    // We don't do anything if frames are already loaded
+                    // if($scope.framesData.length != 0) return;
+                    var tmpViewframesAjaxApiPath = $scope.viewframesAjaxApiPath;
+                    var tmpIndex = $scope.allRecordings.indexOf($scope.recId) + index;
+                    if(index < 0 ) {
+                        $scope.negativeIndex--;
+                    } else if(index > 0){
+                        $scope.positiveIndex++;
+                    }
+                    tmpViewframesAjaxApiPath = tmpViewframesAjaxApiPath.replaceAllRegExp('recording_id', $scope.allRecordings[tmpIndex]);
+                    //Get frames from API Request
+                    $http({
+                        method: 'GET', 
+                        url: tmpViewframesAjaxApiPath
+                    }).success(function (response) {
+						$scope.hideSpinner = false;
+						if(response.data.length == 0){
+							$scope.showFramesData = false;
+						}
+                        var data_tmp = []; //this variable contain filtered data that is to be added into frames
+                        response.data.forEach(function (item, index, arr){
+                            var currentFrameDateTime = moment(new Date(response.data[index].datetime));
+                            var dateTimeFrame = currentFrameDateTime.format('YYYYMMDDHHmmss') + '-0';
+			                if($scope.frames.indexOf(dateTimeFrame)<0){
+                                //console.log(dateTimeFrame, $scope.frames.indexOf(dateTimeFrame))
+                                response.data[index].frameLevel = 1;
+                                response.data[index].label = currentFrameDateTime.format('HH:mm:ss');
+                                response.data[index].dateTimeFrame = currentFrameDateTime.format('YYYYMMDDHHmmss') + '-0';
+                                response.data[index].rec_id = $scope.allRecordings[tmpIndex];
+                                $scope.frames.push(dateTimeFrame);
+                                data_tmp.push(item);
+                                //console.log("data_tmp",data_tmp);
+                            }
+                        });
+                        
+                        if(!$scope.framesData) {
+                            $scope.framesData = data_tmp;
+                        } else {
+                           //$scope.framesData = angular.extend([], $scope.framesData);
+                           if(index < 0) {
+                               insertIntoArray($scope.framesData, 0, data_tmp);
+                           } else {
+                                insertIntoArray($scope.framesData, $scope.framesData.length, data_tmp);
+                           } 
+			
+                        }
+                        
+                        //$scope.framesData.length = 50;
+                        if(isLive == 1 && $scope.framesTab == $scope.tabSelected) {
+                             $timeout(function(){
+                                $scope.loadFrames(index);
+                            }, 10000);
+                        }
+                    });                    
+                    
+                }
+
+                
+
+                $scope.getFrame = function (frameDateTimeStr, frameOffset, type, rec_id) {
+                    
+                    if(type == 'seconds'){
+                        //frameDateTimeStr = '2016/03/27 10:00:32';
+                        //frameOffset = 5;
+
+                        var frameDateTime = moment(new Date(frameDateTimeStr));
+                        frameDateTime = frameDateTime.add(frameOffset, 'seconds');
+                        
+                        var frameIndex = _.findIndex($scope.framesData, function(o) { return o.datetime == frameDateTime.format("YYYY/MM/DD HH:mm:ss"); });
+
+                        // If our required frame is already available then no need to expand frames
+                        if(frameIndex >= 0){
+                            if(frameOffset != -1)    
+                                $scope.getFrame(frameDateTimeStr ,1, 'frames', rec_id);
+                            
+                            if($scope.editSetIn){
+                                $scope.setInTime = frameDateTime.toDate();        
+                                $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss") + '.0';
+                                $scope.currentFrameDateTime = moment($scope.setInTime).format("YYYYMMDDHHmmss") + '-0';
+                                $scope.setFrameStart();
+                                
+                            }else if($scope.editSetOut){
+                                $scope.setOutTime = frameDateTime.toDate();        
+                                $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss") + '.0';
+                                $scope.currentFrameDateTime = moment($scope.setOutTime).format("YYYYMMDDHHmmss") + '-0';
+                                $scope.setFrameEnd();
+                            }           
+                            
+                            return;  
+                        } 
+
+                        var remainderSeconds = frameDateTime.seconds()%10;
+                        var newFrameDateTime = frameDateTime.clone();
+                        newFrameDateTime = newFrameDateTime.subtract(remainderSeconds, 'seconds');
+
+                        var newFrameDateTimeStr = newFrameDateTime.format("YYYY/MM/DD HH:mm:ss");
+                        frameIndex = _.findIndex($scope.framesData, function(o) { return o.datetime == newFrameDateTimeStr; });
+
+                        // If our required data is less than 0th frame, i.e., less than current recording, then no need to expand frames
+                        if(frameIndex < 0 ) return;
+
+                        var frameStartDateTime = newFrameDateTime.clone().add(1,'seconds');
+                        var frameEndDateTime = newFrameDateTime.clone().add(9,'seconds');
+                        
+                        var interval = 1;
+                        var frameLevel = 2;
+
+                    }else if(type == 'frames'){
+                        var frameDateTime = moment(new Date(frameDateTimeStr));
+                        var newFrameOffset = frameOffset;
+                        
+                        if($scope.editSetIn){
+                            newFrameOffset = $scope.setInFrame + frameOffset;
+                        }else if($scope.editSetOut){
+                            newFrameOffset = $scope.setOutFrame + frameOffset;                            
+                        }
+
+                        
+                        // TODO: We have to identify no. of frames per second for this recording and limit newFrameOffset
+                        
+                        var tmpframeIndex = _.findIndex($scope.framesData, function(o) { return o.dateTimeFrame == frameDateTime.format("YYYYMMDDHHmmss") + '-' + newFrameOffset; });
+                        // if(tmpframeIndex < 0 ) newFrameOffset = 0;
+                        
+                        // If our required frame is already available then no need to expand frames
+                        if(tmpframeIndex >= 0) {
+                            if($scope.editSetIn){
+                                $scope.setInFrame = newFrameOffset;
+                                $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss") + '.' + $scope.setInFrame;
+                                $scope.currentFrameDateTime = moment($scope.setInTime).format("YYYYMMDDHHmmss") + '-' + $scope.setInFrame;
+                                $scope.setFrameStart();
+                            }else if($scope.editSetOut){
+                                $scope.setOutFrame = newFrameOffset;        
+                                $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss") + '.' + $scope.setOutFrame;
+                                $scope.currentFrameDateTime = moment($scope.setOutTime).format("YYYYMMDDHHmmss") + '-' + $scope.setOutFrame;
+                                $scope.setFrameEnd();
+                            } 
+							return;
+                        }
+                        
+                        // If newFrameOffset is 0 lets return
+                        if(newFrameOffset == 0){
+                           // return;
+                        }
+                            
+                        
+                        // Find the right time frameIndex where we should insert frames
+                        var frameIndex = _.findIndex($scope.framesData, function(o) { return o.datetime == frameDateTime.format("YYYY/MM/DD HH:mm:ss") });
+						
+                        var frameStartDateTime = frameDateTime.clone();
+                        var frameEndDateTime = frameDateTime.clone();
+						if(frameOffset == -1) {
+							if(tmpframeIndex == -1){
+								frameStartDateTime = moment(frameStartDateTime).subtract(1, 'seconds');
+								frameEndDateTime = moment(frameEndDateTime).subtract(1, 'seconds');
+								$scope.setInTime = new Date($scope.setInTime.getTime() - 1000 );
+							}
+						} else {
+							if(newFrameOffset > 0){
+								newFrameOffset = 0;
+								// frameStartDateTime = moment(frameStartDateTime).add(1, 'seconds');
+								// frameEndDateTime = moment(frameEndDateTime).add(1, 'seconds');
+								frameDateTime = moment(new Date(frameStartDateTime));
+								frameIndex = _.findIndex($scope.framesData, function(o) { return o.datetime == frameDateTime.format("YYYY/MM/DD HH:mm:ss") });
+                                //$scope.setInTime = new Date($scope.setInTime.getTime() + 1000 );
+                                $scope.setInTime = new Date($scope.setInTime.getTime());
+                                
+                            }
+						}
+                        var interval = 'frame';
+                        var frameLevel = 3;  
+                    }
+
+                    var tmpViewframesAjaxApiPath = $scope.viewframesAjaxApiPath.replaceAllRegExp('recording_id', rec_id);
+                    $http({
+                        method: 'GET', 
+                        async : true,
+                        url: tmpViewframesAjaxApiPath,
+                        params: {
+                            start_date_time : frameStartDateTime.format('YYYYMMDDHHmmss'),
+                            end_date_time : frameEndDateTime.format('YYYYMMDDHHmmss'),
+                            interval : interval
+                        }
+                    }).success(function (response) {
+                            //remove first frame in api call for frame level(30 or 60),because first frame and top frame which is clicked are same
+                            if(frameLevel == 3){
+                                response.data.splice(0,1);
+                            }
+                            response.data.forEach(function (item, index, arr){
+                                response.data[index].frameLevel = frameLevel;
+                                var currentFrameDateTime = moment(new Date(response.data[index].datetime));
+                                if(type == 'seconds'){
+                                    response.data[index].label = currentFrameDateTime.format('HH:mm:ss');
+                                    response.data[index].dateTimeFrame = currentFrameDateTime.format('YYYYMMDDHHmmss') + '-0';
+                                } else if(type == 'frames'){
+                                    response.data[index].label = currentFrameDateTime.format('HH:mm:ss') + '.' + (index+1);
+                                    response.data[index].dateTimeFrame = currentFrameDateTime.format('YYYYMMDDHHmmss') + '-' + (index+1);                                
+                                }
+                                response.data[index].rec_id = rec_id;
+                            });
+							var addFramesAt = frameIndex + 1;
+							if(frameOffset == -1 && type=='frames') {
+								addFramesAt--;
+								newFrameOffset = response.data.length;
+								if($scope.editSetIn){
+									// $scope.setInTime = new Date($scope.setInTime.getTime() - 1000);
+								}
+								if($scope.editSetOut){
+									$scope.setOutTime = new Date($scope.setOutTime.getTime() - 1000);
+								}
+							}
+							
+                            insertIntoArray($scope.framesData, addFramesAt, response.data);
+
+                            if(type=='seconds'){
+                                if($scope.editSetIn && $scope.formattedSetInTime == '00:00:00'){
+                                    $scope.setInTime = frameDateTime.toDate();        
+                                    $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss") + '.0';
+                                    $scope.currentFrameDateTime = moment($scope.setInTime).format("YYYYMMDDHHmmss") + '-0';
+                                    $timeout(function(){
+                                        $scope.setFrameStart();
+                                    },2000);
+                                }else if($scope.editSetOut && $scope.formattedSetOutTime == '00:00:00'){
+                                    $scope.setOutTime = frameDateTime.toDate();        
+                                    $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss") + '.0';
+                                    $scope.currentFrameDateTime = moment($scope.setOutTime).format("YYYYMMDDHHmmss") + '-0';
+                                    $timeout(function(){
+                                        $scope.setFrameEnd();
+                                    },2000);
+                                    
+                                }                            
+                            }else if(type=='frames'){
+                                if($scope.editSetIn && $scope.formattedSetInTime == '00:00:00'){
+                                    $scope.setInFrame = newFrameOffset;
+                                    $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss") + '.' + $scope.setInFrame;
+                                    $scope.currentFrameDateTime = moment($scope.setInTime).format("YYYYMMDDHHmmss") + '-' + $scope.setInFrame;
+                                    $timeout(function(){
+                                        $scope.setFrameStart();
+                                    },2000);
+                                    
+                                }else if($scope.editSetOut && $scope.formattedSetOutTime == '00:00:00'){
+                                    $scope.setOutFrame = newFrameOffset;        
+                                    $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss") + '.' + $scope.setOutFrame;
+                                    $scope.currentFrameDateTime = moment($scope.setOutTime).format("YYYYMMDDHHmmss") + '-' + $scope.setOutFrame;
+                                    $timeout(function(){
+                                        $scope.setFrameEnd();
+                                    },2000);
+                                }
+                                
+                            }
+                    });
+                }
+
+                $scope.frameThumbnail = "";
+                $scope.toggleThumbnail = true;
+                $scope.selectFrame = function (dateTime,thumbnail,frame_rec_id){
+                    $scope.frame_rec_id = frame_rec_id;
+                    if($scope.currentFrameDateTime){
+                        var oldDateTime = $scope.currentFrameDateTime;
+                        oldFrameId = '#frame-' + oldDateTime;
+                        $(oldFrameId).removeClass('frame-selected');
+                    }
+                    
+                    $scope.currentFrameDateTime = dateTime;
+                    frameId = '#frame-' + dateTime; 
+                    $(frameId).addClass('frame-selected');
+					
+					if($scope.editSetIn == true && $scope.editSetOut == true){
+						$scope.toggleThumbnail = false;
+						$scope.currentFrameDateTime = dateTime;
+						frameId = '#frame-' + dateTime; 
+						$(frameId).addClass('set-thumbnail-frame-selected');						
+						$scope.setThumbnail = function(){
+							$scope.frameThumbnail = thumbnail;
+							var frameThumbnailDateTime = $scope.currentFrameDateTime.split('-')[0];
+							$scope.getFrameThumbnailDateTime = moment(frameThumbnailDateTime.replace(/[\s:-]/g, '').replace(/\//g, '').substr(0,14),'YYYYMMDDHHmmss').format('YYYY-MM-DD HH:mm:ss');
+							$('.framethumbnail-btn').addClass('active');
+						};
+					}
+					$scope.getFrameThumbnailDateTime = dateTime;
+                }
+                $scope.setInRecId = $scope.recId;
+                $scope.setOutRecId = $scope.recId;
+                $scope.framesTab = false;
+                $scope.setFrameStart = function(){
+                    
+                    // If tabSelected is not Frames, do not do anything
+                    if($scope.tabSelected != $scope.framesTab){
+                        return;
+                    }
+                    
+                    if($scope.currentFrameDateTime){
+                        if($scope.oldStartDateTime){
+                            var oldDateTime = $scope.oldStartDateTime;
+                            oldStartFrameId = '#frame-' + oldDateTime;
+                            $(oldStartFrameId).removeClass('frame-start');
+                        }                 
+                        var dateTime = $scope.currentFrameDateTime;
+                        frameId = '#frame-' + dateTime;
+                        $(frameId).removeClass('frame-selected');
+                        
+                        $(frameId).addClass('frame-start');
+                        $scope.setInRecId = $(frameId).data('recid');
+                        $scope.oldStartDateTime = $scope.currentFrameDateTime;
+                        
+                        var dateTimeFrameArr = dateTime.split("-");
+                        $scope.setInTime = moment(dateTimeFrameArr[0], 'YYYYMMDDHHmmss').toDate();
+                        $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss");
+                        if(dateTimeFrameArr.length > 1){
+                            $scope.setInFrame = parseInt(dateTimeFrameArr[1]);
+                            $scope.formattedSetInTime = $scope.formattedSetInTime + '.' + $scope.setInFrame;
+                        }else{
+                            $scope.setOutFrame = 0;
+                        }
+
+                        $scope.currentFrameDateTime = false;
+                        //$scope.editSetIn = true;
+                    }
+                    //$scope.editSetOut = false;
+                    
+                }
+
+                $scope.setFrameEnd = function(){
+                    // If tabSelected is not Frames, do not do anything
+                    if($scope.tabSelected != $scope.framesTab){
+                        return;
+                    }
+                                
+                    if($scope.currentFrameDateTime){
+                        if($scope.oldEndDateTime){
+                            var oldDateTime = $scope.oldEndDateTime;
+                            oldEndFrameId = '#frame-' + oldDateTime;
+                            $(oldEndFrameId).removeClass('frame-end');
+                        } 
+                        
+                        var dateTime = $scope.currentFrameDateTime;
+                        frameId = '#frame-' + dateTime;
+                        $(frameId).removeClass('frame-selected');
+                        $(frameId).addClass('frame-end');
+                        $scope.oldEndDateTime = $scope.currentFrameDateTime;
+                        
+                        $scope.setOutRecId = $(frameId).data('recid');
+                        var dateTimeFrameArr = dateTime.split("-");
+                        $scope.setOutTime = moment(dateTimeFrameArr[0], 'YYYYMMDDHHmmss').toDate();
+                        $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss");
+                        if(dateTimeFrameArr.length > 1){
+                            $scope.setOutFrame = parseInt(dateTimeFrameArr[1]);
+                            $scope.formattedSetOutTime = $scope.formattedSetOutTime + '.' + $scope.setOutFrame;
+                        }else{
+                            $scope.setOutFrame = 0;
+                        }
+                        
+                        
+                        $scope.currentFrameDateTime = false;
+                        //$scope.editSetOut = true;                        
+                    } 
+                    //$scope.editSetIn = false;
+                    
+                }
+                
+                //Get High Resolution Images                
+                // Show High Res popup                
+                $scope.showHighResPopUp = function(ev) {
+                    if($scope.currentFrameDateTime) {
+                        var getHighResDateTime = $scope.currentFrameDateTime.split('-')[0];
+                        $scope.getHighDateTime = getHighResDateTime.replace(/[\s:-]/g, '').replace(/\//g, '').substr(0,14);
+                        
+                    var tmpViewframesAjaxApiPath = $scope.viewframesAjaxApiPath.replaceAllRegExp('recording_id', $scope.frame_rec_id);
+                        $http({
+                            method: 'GET',
+                            url: tmpViewframesAjaxApiPath + "&high_res=1&start_date_time=" + $scope.getHighDateTime + "&end_date_time=" + $scope.getHighDateTime                           
+                        }).success(function (response) {
+                            $scope.highResResult = response.data;                                                        
+                            
+                            $mdDialog.show({
+                                controller: HighResController,
+                                preserveScope:true,
+                                templateUrl: $scope.highResTplPath,
+                                parent: angular.element(document.body),
+                                targetEvent: ev,
+                                clickOutsideToClose:true,
+                                fullscreen: useFullScreen,
+                                bindToController:true,
+                                locals:{
+                                    HighResData:$scope.highResResult,
+                                }
+                            })
+                            .then(function(HighRes) {
+                                
+                                //Share high res image to social media
+                                var params = {};
+                                params.file_url = HighRes.file_url;                    
+                                params.date = HighRes.shareDate;
+                                params.message = HighRes.shareText;
+                                params.social_media_name = HighRes.socialMediaName;
+                                params.host_name = host_name;                                
+                                var query = $.param(params);
+                                var popupUrl = $scope.socailMediaAjaxApiPath + "?" + query;
+								function openPopup(){
+									var popup = window.open(popupUrl, 'Social_Share', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
+								try {
+									popup.focus();   
+								  }
+									catch (e) {
+									alert("Pop-up Blocker is enabled! Please add this site to your exception list.");
+								}
+                                };
+                                openPopup();
+                            }, function() {
+                                $scope.status = 'You cancelled the dialog.';
+                            });
+                        });
+                        
+                    };
+                    
+                };
+            
+                             
+                //Get loudness data to show in charts
+                $scope.loadLoudness = function() {
+					$scope.hideSpinner = false;
+                    // if($scope.loudnessGrpLoaded) return false;
+                    // $scope.loudnessGrpLoaded = true;
+                    if($scope.metadata.loudness && $scope.metadata.loudness.LN) {
+                        $scope.loudnessData = [];
+                        $scope.loudnessDates = [];
+                        $scope.loudnessDialNum = [];
+                        $scope.loudnessDates.push("times");
+                        $scope.loudnessData.push($scope.callsign);
+                        $scope.loudnessDialNum.push('Dial Norm');
+                        _.forOwn($scope.metadata.loudness.LN, function (value, key) {
+                            var ldnDateTime = key.replaceAllRegExp('-','/');
+                            var ldnvalue = value * 1;
+                            var ldnDn = $scope.metadata.loudness.DN * -1;
+                            $scope.loudnessDates.push(ldnDateTime);
+                            $scope.loudnessData.push(ldnvalue);
+                            $scope.loudnessDialNum.push(ldnDn);
+                        });
+                        var loudnessGraphData = [ $scope.loudnessDates, $scope.loudnessData, $scope.loudnessDialNum ];
+                        $scope.plotGraph('loudnessChart', '#loudness-chart', '%Y/%m/%d %H:%M:%S', loudnessGraphData, true);
+                    }
+                    if(isLive == 1) {
+                        $timeout(function(){
+                            $scope.loadLoudness();
+                        }, 3000);
+                    }
+                };
+                
+                $scope.loadRatings = function() {
+					$scope.hideSpinner = false;
+                    // if($scope.ratingsLoaded) return false;
+                    // $scope.ratingsLoaded = true;
+                    if($scope.metadata.nielsen_ratings) {
+                        $scope.ratingsData = [];
+                        $scope.ratingsDates = [];
+                        $scope.ratingsDates.push("times");
+                        $scope.ratingsData.push($scope.callsign);
+                        _.forOwn($scope.metadata.nielsen_ratings, function (value, key) {
+                            $scope.ratingsDates.push(key);
+                            $scope.ratingsData.push(value);
+                        });
+                        var ratingsGraphData = [ $scope.ratingsDates, $scope.ratingsData ];
+                        $scope.plotGraph('ratingsChart', '#ratings-chart', '%Y-%m-%d %H:%M:%S', ratingsGraphData, false);
+                    }
+                    if(isLive == 1) {
+                        $timeout(function(){
+                            $scope.loadRatings();
+                        }, 3000);
+                    }
+                };
+                
+                $scope.plotGraph = function(variable, div, dateFormat, graphColumns, subchartStatus) {
+                    $scope[variable] = c3.generate({
+                        bindto: div,
+                        data: {
+                            x: 'times',
+                            xFormat: dateFormat,
+                            columns: graphColumns ,
+                            type: 'spline',
+                            onclick: function (d, element) { 
+                                var chartSeekTime = d.x;
+                                $scope.seekToTime(DateFormat.format.date(chartSeekTime , "yyyy/MM/dd HH:mm:ss"));
+                            }
+                        },
+                        axis: {
+                            x: {
+                                type: 'timeseries',
+                                tick: {
+                                    format: '%H:%M:%S',
+                                    values: function(d) {
+                                        var count = 12;
+                                        var gdates = graphColumns[0];
+                                        var xTicks = [];
+                                        if(gdates.length < count * 3) {
+                                            for(var it = 0; it < gdates.length; it++) {
+                                                if(gdates[it] != 'times') {
+                                                    xTicks.push(new Date(gdates[it]));
+                                                }
+                                            }
+                                            return xTicks;
+                                        }
+                                        var minTime = d[0].getTime();
+                                        if(minTime < $scope.seekBarStartDateTime.getTime()) {
+                                            minTime = $scope.seekBarStartDateTime.getTime();
+                                        }
+                                        var maxTime = d[1].getTime();
+                                        var diffTime = maxTime - minTime;
+                                        var diffOfEachTime = diffTime / count;
+                                        var it = minTime;
+                                        while(it<maxTime) {
+                                            xTicks.push(new Date(it));
+                                            it += diffOfEachTime;
+                                        }
+                                        return xTicks;   
+                                    }
+                                }
+                            },
+							y: {
+								tick: {
+									format: d3.format('.2f')
+								}
+							}
+                        },
+                        point: {
+                            r: 0,
+                            focus: {
+                                expand: {
+                                    enabled: true,
+                                    r: 5
+                                }
+                            },
+                        },
+                        subchart: {
+                            show: subchartStatus
+                        },
+                    });
+                    
+                    d3.selectAll('.c3-event-rect').on('click', function(value,index) {
+                        var chartSeekTime = value.x;
+                        $scope.seekToTime(DateFormat.format.date(chartSeekTime , "yyyy/MM/dd HH:mm:ss"));
+                    });
+                }
+                
+            //Get AsRune data to display in tabs
+			$scope.showAsRunData = false;
+            $scope.loadAsRun = function() {
+				$scope.hideSpinner = false;
+                // if($scope.asRunLoaded) return false;
+                // $scope.asRunLoaded = true;
+                $scope.AsRunData = [];
+                _.forOwn($scope.metadata.asrun, function (value, key) {
+					if(value){$scope.showAsRunData = true;}
+                    var time =  key;
+                    var asrunVal = value;
+
+                    var asrunObject = {
+                        time: time
+                        , asrunValue: asrunVal
+                    };
+                    $scope.AsRunData.push(asrunObject);
+                });	
+                if(isLive == 1) {
+                    $timeout(function(){
+                        $scope.loadAsRun();
+                    }, 3000);
+                }			
+            }
+
+            //Get Traffic Data
+			$scope.showTrafficData = false;
+            $scope.loadTrafficData = function() { 
+			$scope.hideSpinner = false;			
+                if($scope.trafficDataLoaded) return false;
+                $scope.trafficDataLoaded = true;
+                $scope.trafficData = [];
+                _.forOwn($scope.metadata.traffic, function (value, key) {
+					if(value){$scope.showTrafficData = true;}
+                	var time = key;
+                    var trafficVal = value;
+
+                    var trafficObject = {
+                        time: time
+                        , traffic: trafficVal
+                    };
+                    $scope.trafficData.push(trafficObject);
+                });
+                if(isLive == 1) {
+                    $timeout(function(){
+                        $scope.loadTrafficData();
+                    }, 3000);
+                }
+            }
+            
+            //Get Annotations data
+            $scope.loadAnnotations = function() {
+                    $scope.hideSpinner = true;
+                
+                if($scope.annotationsLoaded) {
+                    $scope.hideSpinner = false;
+                    return;
+                }
+            
+                if(typeof $scope.metadata.annotation == 'undefined') {
+                        $scope.reloadAnnotations = true;
+                    }
+                
+                
+                _.forOwn($scope.metadata.annotation, function (value, key) {
+                    var individualAnnotation = {
+                        time: key
+                        , annotation: value
+                    };
+                    $scope.annotations.push(individualAnnotation);
+                    $scope.annotationsLoaded = true;
+                });
+				$scope.hideSpinner = false;
+                
+                        
+            };
+            
+            //Clips metadata
+            $scope.getClips = [];
+			$scope.showClipsData = false;            
+            $scope.loadClips = function(){
+				$scope.hideSpinner = true;
+                // We don't do anything if content is already loaded
+                if($scope.getClips.length != 0) {
+					$scope.hideSpinner = false;
+					return;
+				}
+                
+                $http({
+                    method: "GET",
+                    url: $scope.getClipsAjaxApiPath,
+                    params: {
+                        channels : $scope.hostName + "--" + $scope.chanId,
+                        /*
+                        // Enabling start_date and end_date will show clips related to specific recordings
+                        start_date: $scope.formattedRecStartDateTime,
+                        end_date: $scope.formattedRecEndDateTime,
+                        */
+                        page: 1
+                    }
+                }).success(function(response) {
+					if(response.data.length == 0){$scope.showClipsData = true;}
+					$scope.hideSpinner = false;
+                    $scope.getClips = response.data;
+                });                
+            }
+
+            //GIF's metadata
+            $scope.getGifs = [];
+			$scope.showGifsData = false;            
+            $scope.loadGifs = function(){
+				$scope.hideSpinner = true;
+                // We don't do anything if content is already loaded
+                if($scope.getGifs.length != 0) {$scope.hideSpinner = false; return;}
+                
+                $http({
+                    method: "GET",
+                    url: $scope.getGifsAjaxApiPath
+                }).success(function(response){
+					if(response.data.length != 0){$scope.showGifsData = true;}
+					$scope.hideSpinner = false;
+                    $scope.getGifs = response.data;
+                });
+                
+            }
+            
+            
+            //Get SCTE35 data
+			$scope.showTriggersData = false;
+            $scope.loadCuetriggers = function() { 
+			$scope.hideSpinner = false;
+                if($scope.cuetriggersLoaded) return false;
+                $scope.cuetriggersLoaded = true;
+                $scope.cuetriggers = [];
+                _.forOwn($scope.metadata.cuetriggers, function (value, key) {
+					if(value){$scope.showTriggersData = true;}
+                	var time = key;
+                    var cuetrigger =  value;
+                    
+                    var individualCuetrigger = {
+                        time: time,
+                        cuetrigger: cuetrigger
+                    };
+                    $scope.cuetriggers.push(individualCuetrigger);
+                    
+                });
+                if(isLive == 1) {
+                    $timeout(function(){
+                        $scope.loadCuetriggers();
+                    }, 3000);
+                }
+            }
+                
+            /**
+            *** Loading Metadata content Ends here...
+            **/
+            
+            $scope.playStatus = true;
+            $scope.playHeadTime = 0;
+			$scope.toHHMMSS = function(secs){
+				return moment("2015-01-01").startOf('day')
+					.seconds(secs)
+					.format('H:mm:ss');
+            }
+            
+            $scope.playlists = [];
+            $scope.uniquePlaylists = [];
+            
+            // Get Playlists
+            $http({
+                method: 'GET',
+                url: $scope.getPlaylistsAjaxApiPath,
+                params: {
+                    host: host_name
+                }
+            })
+            .then(function successCallback(response) {
+                $scope.playlists = response.data.data;
+                if($scope.playlists.length == 0) {
+                    return;
+                }
+                for(i = 0; i< $scope.playlists.length; i++) {
+                    if($scope.uniquePlaylists.indexOf($scope.playlists[i].playlist) === -1) {
+                        $scope.uniquePlaylists.push($scope.playlists[i].playlist);        
+                    }
+                }
+            }.bind(this), function errorCallback(response) {
+                
+            });
+            
+            $scope.setInTime = new Date($scope.seekBarStartDateTime.getTime());
+            $scope.setInFrame = 0;
+            $scope.setOutTime = new Date($scope.seekBarStartDateTime.getTime());
+            $scope.setOutFrame = 0;
+            $scope.setInOutTimeDiff = $scope.setOutTime.getTime() - $scope.setInTime.getTime();
+            $scope.formattedSetInTime = "00:00:00";
+            $scope.formattedSetOutTime = "00:00:00";
+            $scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff);
+            $scope.formattedPlayBackTime = DateFormat.format.date($scope.seekBarStartDateTime , "HH:mm:ss")
+            
+            // Initiate seekbars
+            $('.editor-seekbar').limitslider({
+                values:     [0,0,0],
+                left:       1,
+                right:      $scope.recDuration - 1,
+                min:        0,
+                max:        $scope.recDuration,
+                step:       1,
+                label:      false,
+                showRanges: true,
+                ranges:     [{styleClass:'range-setin'}, { styleClass: 'range-glow' }, { styleClass: 'range-setout' }, { styleClass: 'range-max'}]
+            });
+            $(document).ready(function() {
+                $("#ui-slider-handle-0").html('<i class="fa fa-step-forward"></i>');
+                $("#ui-slider-handle-1").html('<i class="fa fa-step-backward"></i>');
+                globalSeekBarHandleTooltip = $('<div id="globalSeekBarHandleTooltip" />').text('').hide();
+                $('#ui-slider-handle-2').append(globalSeekBarHandleTooltip);
+                $('#ui-slider-handle-2').hover(
+                    function() {
+                        if($scope.canSeekGlobalPlayHead){
+                            globalSeekBarHandleTooltip.text($scope.formattedPlayBackTime);
+                            globalSeekBarHandleTooltip.show();
+                        }
+                    }, function() {
+                        if($scope.canSeekGlobalPlayHead){
+                            globalSeekBarHandleTooltip.hide();
+                        }
+                    }
+                );
+                
+                $('#ui-slider-handle-0').hover(
+                    function() {
+                        //if($scope.canSeekGlobalPlayHead){
+                            $('#ui-slider-handle-0').append(globalSeekBarHandleTooltip);
+                            globalSeekBarHandleTooltip.text($scope.formattedSetInTime);
+                            globalSeekBarHandleTooltip.show();
+                        //}
+                    }, function() {
+                        //if($scope.canSeekGlobalPlayHead){
+                            globalSeekBarHandleTooltip.hide();
+                            $('#ui-slider-handle-2').append(globalSeekBarHandleTooltip);
+                        //}
+                    }
+                );
+                
+                $('#ui-slider-handle-1').hover(
+                    function() {
+                        //if($scope.canSeekGlobalPlayHead){
+                            $('#ui-slider-handle-1').append(globalSeekBarHandleTooltip);
+                            globalSeekBarHandleTooltip.text($scope.formattedSetOutTime);
+                            globalSeekBarHandleTooltip.show();
+                        //}
+                    }, function() {
+                        //if($scope.canSeekGlobalPlayHead){
+                            globalSeekBarHandleTooltip.hide();
+                            $('#ui-slider-handle-2').append(globalSeekBarHandleTooltip);
+                        //}
+                    }
+                );
+                
+            });
+              // Adding unique IDs for seekbars
+            $(".ui-slider-handle").each(function(index, el) {
+                $(el).attr('id','ui-slider-handle-'+index);
+            });
+            
+            $( ".editor-seekbar" ).limitslider({
+				start: function( event, ui ) {
+                    if(ui.handle.id == "ui-slider-handle-2") {
+						$scope.canSeekGlobalPlayHead = false;
+                        globalSeekBarHandleTooltip.show();
+					}
+				},
+                stop: function( event, ui ) {
+                    if(ui.handle.id == "ui-slider-handle-2") {
+                        $scope.videoPlayers['playerone'].seek(ui.value);
+						$scope.canSeekGlobalPlayHead = true;
+                        $('.editor-seekbar').limitslider("values", 2, ui.value);
+                        globalSeekBarHandleTooltip.hide();
+                    } else if(ui.handle.id == "ui-slider-handle-0") {
+                        $scope.setInTime = new Date($scope.seekBarStartDateTime.getTime() + ui.value * 1000);
+                        $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss");
+                        $scope.setInOutTimeDiff = $scope.setOutTime.getTime() - $scope.setInTime.getTime();
+                        if($scope.setInOutTimeDiff > 0) {
+                            $scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff / 1000);
+                        }
+                        $('.editor-seekbar').limitslider("values", 0, ui.value);
+                        globalSeekBarHandleTooltip.hide();
+                    } else if(ui.handle.id == "ui-slider-handle-1") {
+                        $scope.setOutTime = new Date($scope.seekBarStartDateTime.getTime() + ui.value * 1000);
+                        $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss");
+                        $scope.setInOutTimeDiff = $scope.setOutTime.getTime() - $scope.setInTime.getTime();
+                        if($scope.setInOutTimeDiff > 0) {
+                            $scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff / 1000);
+                        }
+                        $('.editor-seekbar').limitslider("values", 1, ui.value);
+                        globalSeekBarHandleTooltip.hide();
+                    }
+                },
+				slide: function( event, ui ) {
+                    if(ui.handle.id == "ui-slider-handle-2") {
+                        var seekToolTipDt = new Date($scope.seekBarStartDateTime.getTime() + (ui.value * 1000));
+                        var seekToolTipValue = DateFormat.format.date( seekToolTipDt , "HH:mm:ss");
+                        globalSeekBarHandleTooltip.text(seekToolTipValue);
+					}
+                    if(ui.handle.id == "ui-slider-handle-0") {
+                        var seekToolTipDt = new Date($scope.seekBarStartDateTime.getTime() + (ui.value * 1000));
+                        var seekToolTipValue = DateFormat.format.date( seekToolTipDt , "HH:mm:ss");
+                        globalSeekBarHandleTooltip.text(seekToolTipValue);
+					}
+                    if(ui.handle.id == "ui-slider-handle-1") {
+                        var seekToolTipDt = new Date($scope.seekBarStartDateTime.getTime() + (ui.value * 1000));
+                        var seekToolTipValue = DateFormat.format.date( seekToolTipDt , "HH:mm:ss");
+                        globalSeekBarHandleTooltip.text(seekToolTipValue);
+					}
+				},
+            });
+            //Upload to youtube
+            
+            $scope.uploadToYoutube = function(media_name,file_url){
+                var social_media_name = media_name;
+                var social_api_url = $scope.socailMediaAjaxApiPath + "?";
+                var params = {};
+                params.file_url = file_url;               
+                params.social_media_name = social_media_name;
+                params.host_name = host_name;
+                var query = $.param(params);
+                var popupUrl = social_api_url + query;
+                
+                $http({
+                    method:"GET",
+                    url:popupUrl
+                }).success(function(response){   
+                    $scope.showYoutubeResponse(event, '<p>Successfully Uploaded.</p><p>YouTube URL: <a target="_blank" href="' + response.url + '">' + response.url + '</a></p>');
+                }).error(function(error){
+                    $scope.showYoutubeResponse(event, 'Upload to YouTube failed.');
+                });
+            };
+            
+            $scope.showYoutubeResponse= function(ev, content) {
+                $mdDialog.show({
+                    controller: DialogController,
+                    preserveScope:true,
+                    templateUrl: $scope.dialogTplPath,
+                    parent: angular.element(document.body),
+                    targetEvent: ev,
+                    clickOutsideToClose:true,
+                    fullscreen: useFullScreen,
+                    bindToController:true,
+                    locals:{
+                        title: 'Upload To YouTube',
+                        content: content,
+                        buttons: [
+                            {'text':'Ok'}
+                        ]
+                    }
+                })
+                .then(function(answer) {
+                    
+                });
+            };
+            
+            // Show Upload to Facebook popup
+            $scope.showSharePopUp = function(ev,file_url,social_media_name,thumb_image) {
+                $mdDialog.show({
+                    controller: SocialController,
+                    preserveScope:true,
+                    templateUrl: $scope.socialTplPath,
+                    parent: angular.element(document.body),
+                    targetEvent: ev,
+                    clickOutsideToClose:true,
+                    fullscreen: useFullScreen,
+                    bindToController:true,
+                    locals:{
+                        file_url:file_url,
+                        social_media_name:social_media_name,
+                        thumbnail:thumb_image
+                    }
+                })
+                .then(function(socialShare) {
+                    var social_media_name = socialShare.mediaName;
+                    var social_api_url = $scope.socailMediaAjaxApiPath + "?";
+                    var params = {};
+                    params.file_url = socialShare.file_url;                    
+                    params.date = socialShare.shareDate;
+                    params.message = socialShare.shareText;
+                    params.social_media_name = social_media_name;
+                    params.host_name = host_name;
+                    var query = $.param(params);
+                    
+                    var popupUrl = social_api_url + query;
+                    
+                    var popup = window.open(popupUrl, Date.now(), 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
+                    
+                }, function() {
+                    $scope.status = 'You cancelled the dialog.';
+                });
+            };
+			
+			// Show Clip Share via email popup                
+                $scope.showClipEmailPopUp = function(clipLink,ev) {
+                    $scope.EmailClipLink = {};
+					$scope.EmailClipLink.frame_url = clipLink;
+					$scope.EmailClipLink.attachment_path = clipLink;
+					//$mdDialog.cancel($scope.EmailClipLink);
+                    $mdDialog.show({
+                                controller: HighClipEmailController,
+                                preserveScope:true,
+                                templateUrl: editorEmailTplPath,
+                                parent: angular.element(document.body),
+                                targetEvent: ev,
+                                clickOutsideToClose:true,
+                                fullscreen: $mdMedia('sm') || $mdMedia('xs'),
+                                bindToController:true,
+                                locals:{
+                                    EmailClipData:$scope.EmailClipLink,
+                                }
+                            })
+                            .then(function(emailData) {
+								$scope.email = emailData || {};
+                                //Share high res image through email
+								if(typeof $scope.email.fromEmail == "undefined") {
+									$scope.mailError = "Please enter FromEmail";
+									return;
+								}
+								if(typeof  $scope.email.toEmail == "undefined") {
+									$scope.mailError = "Please enter ToEmail";
+									return;
+								}
+								if(typeof  $scope.email.subject == "undefined") {
+									$scope.mailError = "Please enter subject";
+									return;
+								}
+								if(typeof  $scope.email.message == "undefined") {
+									$scope.mailError = "Please enter message";
+									return;
+								}
+
+								
+								
+								var message = $scope.email.message + "<br><a href=" + $scope.EmailClipLink.attachment_path + " >Watch</a>";
+								var postData = {
+									'from_email':$scope.email.fromEmail,
+									'to_email':$scope.email.toEmail,
+									'email_subject':$scope.email.subject,
+									'email_message':message,
+									'host_name':hostName,
+								};
+								
+								$scope.mailSuccess = "Sending mail....";
+								$scope.mailError = '';
+								
+								$http({
+								  method: 'POST',
+								  url: sendMailAjaxApiPath,
+								  data: postData
+								})
+								.then(function successCallback(response) {
+									$scope.mailSuccess = response.data.data.messages[0];
+								}, function errorCallback(response) {
+									$scope.mailError = 'Failed to send mail';
+								});
+                            }, function() {
+                                $scope.status = 'You cancelled the dialog.';
+                    });
+                    
+                };
+            
+            // Show social share to GIF's popup
+            $scope.clipSharePopUp = function(ev,social_media_name,thumb_gif) {
+                $mdDialog.show({
+                    controller: SocialGifController,
+                    preserveScope:true,
+                    templateUrl: $scope.socialTplPath,
+                    parent: angular.element(document.body),
+                    targetEvent: ev,
+                    clickOutsideToClose:true,
+                    fullscreen: useFullScreen,
+                    bindToController:true,
+                    locals:{
+                        file_url:thumb_gif,
+                        social_media_name:social_media_name,
+                        thumbnail:thumb_gif
+                    }
+                })
+                .then(function(socialGifShare) {
+                    var social_media_name = socialGifShare.mediaName;
+                    var social_api_url = $scope.socailMediaAjaxApiPath + "?";
+                    var params = {};
+                    params.file_url = socialGifShare.file_url;                    
+                    params.date = socialGifShare.shareDate;
+                    params.message = socialGifShare.shareText;
+                    params.social_media_name = social_media_name;
+                    params.host_name = host_name;
+                    var query = $.param(params);
+                    
+                    var popupUrl = social_api_url + query;
+                    
+                    var popup = window.open(popupUrl, Date.now(), 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
+                    
+                }, function() {
+                    $scope.status = 'You cancelled the dialog.';
+                });
+            };            
+            
+            // Show Export popup
+            $scope.showExportPopUp = function(ev) {
+                
+                $scope.clipName = DateFormat.format.date($scope.seekBarStartDateTime , "yyyy-MM-dd") +
+                                    DateFormat.format.date($scope.seekBarStartDateTime , "-HHmm") +
+                                    DateFormat.format.date($scope.seekBarEndDateTime , "-HHmm") +
+                                    DateFormat.format.date($scope.setInTime , "-HHmmss") +
+                                    DateFormat.format.date($scope.setOutTime , "-HHmmss");
+                $mdDialog.show({
+                    controller: ExportController,
+                    preserveScope:true,
+                    templateUrl: $scope.exportTplPath,
+                    parent: angular.element(document.body),
+                    targetEvent: ev,
+                    clickOutsideToClose:true,
+                    fullscreen: useFullScreen,
+                    bindToController:true,
+                    scope: $scope.$new(),
+					locals:{
+						thumbnail:$scope.frameThumbnail,
+						frameThumbnailDateTime:$scope.getFrameThumbnailDateTime
+					}
+                })
+                .then(function() {
+                }, function() {
+                    $scope.status = 'You cancelled the dialog.';
+                });
+            };
+            
+            $scope.loadNextVideo = false;
+            $scope.loadPrevVideo = false;
+            $scope.previewClip = function(evt) {
+                $scope.playType = false;
+                if($scope.setInTime.getTime() < $scope.setOutTime.getTime()) {
+                    $scope.playType = 'preview';
+                    if($scope.setInRecId == $scope.playingRecId && $scope.setOutRecId == $scope.playingRecId) {
+                        $scope.loadPrevVideo = false;
+                        $scope.loadNextVideo = false;
+                        var seekTo = ($scope.setInTime.getTime() - $scope.seekBarStartDateTime.getTime()) / 1000;
+                        var playerId = 'playerone';
+                        $scope.videoPlayers[playerId].seek(seekTo);
+                    } else {
+                        if($scope.setInTime.getTime() > $scope.seekBarStartDateTime.getTime() && $scope.setInTime.getTime() < $scope.seekBarEndDateTime.getTime()) {
+                            $scope.loadPrevVideo = false;
+                            $scope.loadNextVideo = $scope.setOutRecId;
+                            $scope.clipEnabled = true;
+                            var seekTo = ($scope.setInTime.getTime() - $scope.seekBarStartDateTime.getTime()) / 1000;
+                            var playerId = 'playerone';
+                            $scope.videoPlayers[playerId].seek(seekTo);
+                        } else {
+                            $scope.loadPrevVideo = $scope.setInRecId;
+                            $scope.loadNextVideo = $scope.setOutRecId;
+                            $scope.clipEnabled = true;
+                            
+                            var tmpRecStartDateTime = allRecordingsDetails[$scope.loadPrevVideo]['rec_start'].replaceAllRegExp('-', '/');
+                            var tmpRecEndDateTime = allRecordingsDetails[$scope.loadPrevVideo]['rec_end'].replaceAllRegExp('-', '/');
+                            
+                            var m3u8_path = allRecordingsDetails[$scope.loadPrevVideo]['m3u8_path'];
+                            $scope.seekBarStartDateTime = new Date(tmpRecStartDateTime);
+                            $scope.seekBarEndDateTime = new Date(tmpRecEndDateTime);
+                            
+                            $scope.videoPlayers['playerone'].changeMediaSource(m3u8_path);
+                            $scope.playingRecId = $scope.loadPrevVideo;
+                        }
+                    }                
+				} 
+                
+            };
+            
+            $scope.editSetIn = false;
+            $scope.setInText = 'SET IN';
+            $scope.setIn = function() {
+				if ($scope.editSetIn == false) {
+					$scope.setInText = 'IN SET';
+					$scope.editSetIn = true;
+					$('#ui-slider-handle-0').addClass('active');
+				} else if ($scope.editSetIn == true) {
+					$scope.setInText = 'SET IN';
+					$scope.editSetIn = false;
+					$('#ui-slider-handle-0').removeClass('active');
+				}                
+                //$scope.editSetIn = !$scope.editSetIn;  
+                //$scope.editSetOut = false;
+                if($scope.tabSelected === $scope.framesTab) {
+                    $scope.setFrameStart();
+                    if(typeof $scope.currentFrameDateTime == 'undefined') {
+                        var setInSeekPosition = $scope.playHeadTime;
+                        $scope.formattedSetInTime = $scope.formattedPlayBackTime;
+                    } else {
+                        var setInSeekPosition = ( $scope.setInTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                    }
+                }else{
+                    $scope.setInRecId = $scope.recId;
+                    $scope.setInTime = new Date($scope.seekBarStartDateTime.getTime() + $scope.playHeadTime * 1000);    
+                    $scope.formattedSetInTime = DateFormat.format.date($scope.setInTime , "HH:mm:ss");
+                    var setInSeekPosition = ( $scope.setInTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                }
+                $scope.setInOutTimeDiff = $scope.setOutTime.getTime() - $scope.setInTime.getTime();
+                if($scope.setInOutTimeDiff > 0) {
+                    $scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff / 1000);
+                }
+               
+                $('.editor-seekbar').limitslider("values", 0, setInSeekPosition);
+            };
+            
+            $scope.editSetOut = false;
+			$scope.exportActive = true;
+            $scope.setOutText = 'SET OUT';
+            $scope.setOut = function() {
+				if ($scope.exportActive == true) {
+					$scope.setOutText = 'OUT SET';
+					$scope.exportActive = false;
+					$scope.editSetOut = true;
+					$('#ui-slider-handle-1').addClass('active');
+				} else if ($scope.exportActive == false) {
+					$scope.setOutText = 'SET OUT';
+					$scope.exportActive = true;
+					$scope.editSetOut = false;
+					$('#ui-slider-handle-1').removeClass('active');
+				}
+                //$scope.editSetOut = !$scope.editSetOut; 
+                //$scope.editSetIn = false;
+                if($scope.tabSelected === $scope.framesTab) {
+                    $scope.setFrameEnd();
+                    if(typeof $scope.currentFrameDateTime == 'undefined') {
+                        var setOutSeekPosition = $scope.playHeadTime;
+                        $scope.formattedSetOutTime = $scope.formattedPlayBackTime;
+                    } else {
+                        var setOutSeekPosition = ( $scope.setOutTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                    }
+                }else{
+                    $scope.setOutRecId = $scope.recId;
+                    $scope.setOutTime = new Date($scope.seekBarStartDateTime.getTime() + $scope.playHeadTime * 1000);    
+                    $scope.formattedSetOutTime = DateFormat.format.date($scope.setOutTime , "HH:mm:ss");                    
+                    var setOutSeekPosition = ( $scope.setOutTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                }
+                $scope.setInOutTimeDiff = $scope.setOutTime.getTime() - $scope.setInTime.getTime();
+                if($scope.setInOutTimeDiff > 0) {
+                    $scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff / 1000);
+                }
+                $('.editor-seekbar').limitslider("values", 1, setOutSeekPosition);
+            };
+
+			//below code for displaying start time in player info right side
+			
+			if($scope.clipStart){
+				$scope.setIn();
+				$scope.formattedSetInTime = DateFormat.format.date($scope.clipStart , "HH:mm:ss");				
+				$('.editor-seekbar').limitslider("values", 0, $scope.videoPlayFrom);								
+			}
+			
+			//below code for displaying end time in player info right side
+			if($scope.clipEnd){
+				$scope.setOut();
+				$scope.formattedSetOutTime = DateFormat.format.date($scope.clipEnd , "HH:mm:ss");				
+				$('.editor-seekbar').limitslider("values", 1, $scope.videoPlayTill);				
+			}
+			
+			//below code for displaying diff time in player info right side
+			if($scope.clipStart && $scope.clipEnd){
+				var ct_start = new Date( $scope.clipStart );
+				var ct_end = new Date( $scope.clipEnd );
+				$scope.setInOutTimeDiff = ct_end.getTime() - ct_start.getTime();
+				if($scope.setInOutTimeDiff > 0) {
+					$scope.formattedSetInOutTimeDiff = $scope.toHHMMSS($scope.setInOutTimeDiff / 1000);
+				}		
+			}
+
+
+            //below code is for forwarding,backwarding video for -10,-5,+5
+			$scope.trickPlayBackValues = [1,1.5,2,4,8];
+            $scope.currentSpeed = 1;
+            $scope.currentSpeedIndex = 0;
+            $scope.toggleTrickPlayBack = function(trickType) {
+                if(trickType != 1) {
+                    $scope.videoPlayers['playerone'].seekBy(trickType);
+                }else if(trickType == 1) {
+                    $scope.currentSpeedIndex++;
+                    if( $scope.currentSpeedIndex > $scope.trickPlayBackValues.length - 1 ) {
+                        $scope.currentSpeedIndex = 0;
+                    }
+                    $scope.currentSpeed = $scope.trickPlayBackValues[$scope.currentSpeedIndex];
+                    $scope.videoPlayers['playerone'].speed($scope.currentSpeed);
+                }
+            }
+            
+            $scope.seekByStarted = false;            
+            $scope.seekBy = function(offset, type) {
+                // If already seeking return false
+                if($scope.seekByStarted) return false;
+
+                
+                if($scope.tabSelected == $scope.framesTab) {
+                    $scope.seekByStarted = true;
+                    if($scope.editSetIn){
+                        $scope.getFrame(moment($scope.setInTime).format("YYYY/MM/DD HH:mm:ss"), offset, type, $scope.playingRecId);
+                    }else if($scope.editSetOut){
+                        $scope.getFrame(moment($scope.setOutTime).format("YYYY/MM/DD HH:mm:ss"), offset, type, $scope.playingRecId);
+                    }
+                }else{                
+                    $scope.videoPlayers['playerone'].seekBy(offset);
+                }
+                $scope.seekByStarted = false;                
+            };
+            
+            $scope.seekToTime = function(time) {
+                $scope.tmpSeekTime = new Date(time.replaceAllRegExp('-','/'));
+                $scope.seekTo = ($scope.tmpSeekTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                $scope.videoPlayers['playerone'].seek($scope.seekTo);
+            };
+            $scope.playPause = function() {
+                if(!$scope.playStatus) {
+                    if($scope.playType == 'preview' ) {
+                        if($scope.stoppedByPreview) {
+                            $scope.playType = "";
+                        }
+                    }
+                    $scope.playStatus = true;
+                    $scope.videoPlayers['playerone'].play();
+                } else {
+                    $scope.currentSpeed = 1;
+                    $scope.playStatus = false;
+                    $scope.videoPlayers['playerone'].pause();
+                }
+            };
+            $scope.playingRecId = $scope.recId;
+            $scope.seekByFrame = function(dateTime, rec_id) {
+                var formatedSeekByFrameDateTime = dateTime.substr(0,4) + '-' + dateTime.substr(4,2) + '-' + dateTime.substr(6,2) + ' ' + dateTime.substr(8,2) + ':' + dateTime.substr(10,2) + ':' + dateTime.substr(12,2);
+                if($scope.playingRecId == rec_id) {
+                    $scope.seekToTime(formatedSeekByFrameDateTime);
+                } else {
+                    var tmpRecStartDateTime = allRecordingsDetails[rec_id]['rec_start'].replaceAllRegExp('-', '/');
+                    var tmpRecEndDateTime = allRecordingsDetails[rec_id]['rec_end'].replaceAllRegExp('-', '/');
+                    var tmpSeekDateTime = new Date(formatedSeekByFrameDateTime.replaceAllRegExp('-', '/'));
+                    var m3u8_path = allRecordingsDetails[rec_id]['m3u8_path'];
+                    $scope.seekBarStartDateTime = new Date(tmpRecStartDateTime);
+                    $scope.seekBarEndDateTime = new Date(tmpRecEndDateTime);
+                    
+                    $scope.seekOffSet = (tmpSeekDateTime.getTime() - $scope.seekBarStartDateTime.getTime()) / 1000 ;
+                    $scope.videoPlayers['playerone'].changeMediaSource(m3u8_path);
+                    $scope.playingRecId = rec_id;
+                    //console.log('Play from:', formatedSeekByFrameDateTime, $scope.seekOffSet);
+                    $scope.videoPlayFrom = $scope.seekOffSet;
+                }
+            }
+           
+            // Caption seekto method
+            $scope.captionsAutoScroll = false;
+			$scope.toggleAutoScroll = function(toggleMetadata,stateVal){
+					if(toggleMetadata == 'captions'){
+						$scope.captionsAutoScroll = stateVal;
+					}else if(toggleMetadata == 'frames'){
+						$scope.framesAutoScroll = stateVal;
+					}else if(toggleMetadata == 'asrun'){
+						$scope.asrunAutoScroll = stateVal;
+					}else if(toggleMetadata == 'traffic'){
+						$scope.trafficAutoScroll = stateVal;
+					}				
+			};
+            $scope.captionsScrollTo = function (caption) {
+                if($scope.captionsAutoScroll == false){
+                    return;
+                }
+                if ($('#captions-div').children(".captions-data").children('#' + caption).length ) {                    
+                    $('.captions-data li').removeClass('caption-active');
+                    $('#captions-div').scrollTo('#' + caption);
+                    $('#' + caption).addClass('caption-active');
+                }
+            };      
+            $scope.framesAutoScroll = false;
+            $scope.framesScrollTo = function (frameId) {
+                if($scope.framesAutoScroll == false){
+                    return;
+                }
+				
+                if ($('#' + frameId + '-0').length) {
+                    $('.frames-metadata-section').scrollTo('#' + frameId + '-0');
+                    $(".frames-data-list").removeClass('frame-scrolling');
+                    $("#" + frameId +'-0').addClass('frame-scrolling');
+                };
+            };
+            
+            // asRun Scrollto
+            $scope.asrunAutoScroll = false;
+            $scope.asRunScrollTo = function (asrun) {
+                if($scope.asrunAutoScroll == false){
+                    return;
+                }
+                if ($('#asrun-metadata-div').children(".asrun-data").children('#' + asrun).length ) {                    
+                    $('.asrun-data li').css({
+                        'font-weight': 'normal'
+                    });
+                    $('#asrun-metadata-div').scrollTo('#' + asrun);
+                    $('#' + asrun).css({
+                        'font-weight': 'bold'
+                    });
+                }
+            };
+            
+            // Traffic Scrollto
+            $scope.trafficAutoScroll = false;
+            $scope.trafficScrollTo = function (traffic) {
+                if($scope.trafficAutoScroll == false){
+                    return;
+                }
+                if ($('#traffic-metadata-div').children(".traffic-data").children('#' + traffic).length ) {                    
+                    $('.traffic-data li').css({
+                        'font-weight': 'normal'
+                    });
+                    $('#traffic-metadata-div').scrollTo('#' + traffic);
+                    $('#' + traffic).css({
+                        'font-weight': 'bold'
+                    });
+                }
+            };
+            
+            $scope.clipEnabled = false;
+            $scope.canSeekGlobalPlayHead = true;
+            $scope.programStartDateTime = $scope.seekBarStartDateTime;
+            $scope.previewSeekTo = false;
+            $scope.playLive = function() {
+                var tmpSeekTo = moment(now).format("YYYY/MM/DD HH:mm:ss");
+                $scope.seekToTime(tmpSeekTo);
+            };
+            $scope.$on("videoPlayer.ready", function(e, playerId) {
+                $scope.videoPlayers[playerId].setProgramStartDateTime($scope.programStartDateTime);
+                if($scope.playType == 'clip' && $scope.videoPlayFrom) {
+                    $scope.videoPlayers[playerId].seek($scope.videoPlayFrom);
+                    $scope.videoPlayFrom = false;
+                }
+                if($scope.seekOffSet) {
+                    $scope.videoPlayers[playerId].seek($scope.seekOffSet - 3);
+                }
+                $scope.videoPlayers[playerId].setPlayerInitialized();
+                
+                if($scope.playType == 'preview') {
+                    if($scope.loadPrevVideo && $scope.setInTime.getTime() > $scope.seekBarStartDateTime.getTime()) {
+                        var tmpSeekDiff = ($scope.setInTime.getTime() - $scope.seekBarStartDateTime.getTime() ) / 1000;
+                        $scope.videoPlayers[playerId].seek(tmpSeekDiff);
+                        $scope.loadPrevVideo = false;
+                    }
+                }
+            });
+            
+            $scope.$on("videoPlayer.resume", function(e, playerId) {
+                if(!$scope.playStatus) {
+                    $scope.playStatus = true;
+                }
+                if($scope.videoPlayFrom) {
+                    //console.log('SeekTo:', $scope.videoPlayFrom);
+                    //console.log('Sleeping for a while to load player before seeking...');
+                    $timeout(function(){
+                        $scope.videoPlayers[playerId].pause();
+                        $scope.videoPlayers[playerId].seek($scope.videoPlayFrom);
+                        $scope.videoPlayers[playerId].play();
+                        $scope.videoPlayFrom = false;
+                    }, 4000);
+                }
+                
+            });
+            $scope.$on("videoPlayer.pause", function(e, playerId) {
+                if($scope.playStatus) {
+                    $scope.playStatus = false;
+                }
+            });
+            
+            $scope.$on("videoPlayer.progress", function(e, playerId, secs) {
+                $scope.stoppedByPreview = false;
+                if(!$scope.canSeekGlobalPlayHead) {
+                    return;
+                }
+                $scope.playHeadTime = secs;
+                $('.editor-seekbar').limitslider("values", 2, secs);
+                $scope.scrollToTime = new Date($scope.seekBarStartDateTime.getTime() + secs * 1000);
+                $scope.formattedPlayBackTime = DateFormat.format.date($scope.scrollToTime , "HH:mm:ss");
+                if($scope.tabSelected == $scope.captionsTab) {
+                    $scope.captionsScrollTo( "caption-" + DateFormat.format.date($scope.scrollToTime , "yyyyMMddHHmmss"))
+                }
+                if($scope.tabSelected == $scope.framesTab) {
+                    $scope.framesScrollTo( "frame-" + DateFormat.format.date($scope.scrollToTime , "yyyyMMddHHmmss"));
+                }
+                if($scope.playType == 'clip' && $scope.videoPlayTill && $scope.videoPlayTill <= secs) {
+                    $scope.stoppedByPreview = true;
+                    $scope.playPause();
+                } 
+                if($scope.playType == 'preview' && $scope.setOutTime.getTime() <= $scope.scrollToTime.getTime()) {
+                    $scope.stoppedByPreview = true;
+                    $scope.playPause();
+                }
+                
+            });
+			
+            $scope.$on("videoPlayer.seek", function(e, playerId) {
+                $scope.videoPlayers[playerId].play();
+            });
+            
+            $scope.$on("videoPlayer.finish", function(e, playerId) {
+                if($scope.loadNextVideo && !$scope.loadPrevVideo ) {
+                    var tmpRecStartDateTime = allRecordingsDetails[$scope.loadNextVideo]['rec_start'].replaceAllRegExp('-', '/');
+                    var tmpRecEndDateTime = allRecordingsDetails[$scope.loadNextVideo]['rec_end'].replaceAllRegExp('-', '/');
+                    
+                    var m3u8_path = allRecordingsDetails[$scope.loadNextVideo]['m3u8_path'];
+                    $scope.seekBarStartDateTime = new Date(tmpRecStartDateTime);
+                    $scope.seekBarEndDateTime = new Date(tmpRecEndDateTime);
+                    
+                    $scope.videoPlayers[playerId].changeMediaSource(m3u8_path);
+                    $scope.playingRecId = $scope.loadNextVideo;
+                }
+            });
+			
+		//Clips in progress
+        
+        $scope.clipProgressCompleted = [];
+		$scope.getCurrentProgressClip=function(clip_id) {
+							$scope.completed_progress_show=true;
+							$scope.completed_progress=false;
+                            $http({
+                                method: 'GET',
+                                url: inProgressUrl + "/" + clip_id
+                            })
+                            .then(function successCallback(responseData) {
+								
+                                $scope.clipInProgress=responseData.data.data[0];
+								console.log($scope.clipInProgress);
+                                     console.log($scope.clipInProgress.clip_status);                        
+                                  if($scope.clipInProgress.clip_status =='completed'){
+                                            $scope.currentClipProgressCompleted=$scope.clipInProgress;
+											clearInterval(timeout_interval);
+											$scope.success_clip=false;
+											$scope.completed_progress=true;
+											$scope.clipInProgress.clip_status='0%';
+											
+                                        }                 
+                              
+                                
+                            }.bind(this), function errorCallback(responseData) {});
+        };
+        $scope.getProgressClips=function() {
+			console.log('dsa');
+            $http({
+                    method: 'GET'
+                    , url: inProgressUrl + "?clip_start_datetime=" + $scope.formattedRecStartDateTime + "&clip_end_datetime=" + $scope.formattedRecEndDateTime + "&callsign=" + $scope.callsign
+                })
+                .then(function successCallback(response) {
+                    $scope.inProgressClips = _.filter(response.data.data, function(o) { return o.host_name == $scope.hostName; });
+					
+                    var ProgressClipsIds = [];
+                    angular.forEach($scope.inProgressClips,function(clipProgressItem){
+                        
+                        if(!clipProgressItem){
+                            return;
+                        }
+							
+                            $http({
+                                method: 'GET',
+                                url: inProgressUrl + "/" + clipProgressItem.clip_id
+                            })
+                            .then(function successCallback(responseData) {
+                               // $scope.clipInProgress=clipProgressItem;
+                               _.forOwn(responseData.data.data,function(value,key){
+                                    var index = _.findIndex($scope.clipProgressCompleted,function(item){                                    
+                                        return item.clip_id == clipProgressItem.clip_id;
+                                    });                                    
+                                        if(value.clip_status =='completed' && index == -1){
+                                            $scope.clipProgressCompleted.push(value);
+											clearInterval(timeout_interval);
+                                            console.log($scope.clipProgressCompleted);
+                                        }                 
+                                    
+                                });
+                                
+                            }.bind(this), function errorCallback(responseData) {});
+                       
+                    });
+                    
+                
+                }.bind(this), function errorCallback(response) {});
+				
+        };
+		
+        var cancelParams = {};
+        $scope.CancelClipProgress = function(hostName,clipId){
+            cancelParams.host_name = hostName;
+            cancelParams.clip_id = clipId;
+            $scope.cancelling_clip=true;
+			$scope.cancel_show=true;
+			$http({
+                method:"POST",
+                url:inProgressCancelUrl,
+                data:cancelParams
+            })
+            .then(function successCallback(response){
+				$scope.clip_cancelled=true;
+				$success_clip=false;
+				$scope.cancelling_clip=false;
+				$scope.clipInProgress.clip_status='0%';
+				clearInterval(timeout_interval);
+               $timeout(function(){
+                        $mdDialog.hide();
+                    },1000);
+            }.bind(this),function errorCallback(response){
+                
+            });
+        };	
+		
+        }]);
+            
+        //Custom scrollTo Jquery function
+        $.fn.scrollTo = function (target, options, callback) {
+            if (typeof options == 'function' && arguments.length == 2) {
+                callback = options;
+                options = target;
+            }
+            var settings = $.extend({
+                scrollTarget: target
+                , offsetTop: 50
+                , duration: 500
+                , easing: 'swing'
+            }, options);
+            return this.each(function () {
+                var scrollPane = $(this);
+                var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
+                // We have modified this scrollTo plugin to work with captions div.
+                // We are subtracting scrollPane.offset().top to scroll to right position in div
+                var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollTarget.offset().top - scrollPane.offset().top + scrollPane.scrollTop() - parseInt(settings.offsetTop);
+                scrollPane.animate({
+                    scrollTop: scrollY
+                }, parseInt(settings.duration), settings.easing, function () {
+                    if (typeof callback == 'function') {
+                        callback.call(this);
+                    }
+                });
+            });
+        }

@@ -50,7 +50,7 @@ router.put('/upload/:username',uploads.array('files'),function(req,res){
             console.log(err,'is')
         }
         if(user){
-            res.json({success:true,user:user});
+            res.json({success:true,file:files});
         }
         else{
             res.json({success:false});

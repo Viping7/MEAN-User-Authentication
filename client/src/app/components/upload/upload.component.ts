@@ -7,16 +7,17 @@ import { FormService } from '../../services/form.service'
 })
 export class UploadComponent implements OnInit {
    avatar;
+    filedata;
   constructor(private formService:FormService) { }
    getFiles(event){ 
          
         this.avatar = event.target.files; 
         this.formService.uploadPic(this.avatar).subscribe(data=>{
-            /*var filepath='./uploads/'+data.user.file[0].filename;
+            var filepath='uploads/'+data.file[0].filename;
+            console.log(filepath);
             this.formService.getFile(filepath).subscribe(data=>{
-                console.log(data); 
-            });*/
-            console.log(data);
+                this.filedata=data['_body']; 
+            });
         })
     } 
   ngOnInit() {

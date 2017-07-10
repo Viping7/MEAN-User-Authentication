@@ -91,6 +91,7 @@ AppComponent = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__guard_auth_guard__ = __webpack_require__("../../../../../src/app/guard/auth.guard.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__routes__ = __webpack_require__("../../../../../src/app/routes.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__components_upload_upload_component__ = __webpack_require__("../../../../../src/app/components/upload/upload.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__directives_codeformatter_directive__ = __webpack_require__("../../../../../src/app/directives/codeformatter.directive.ts");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -98,6 +99,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -131,7 +133,8 @@ AppModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_10__components_home_home_component__["a" /* HomeComponent */],
             __WEBPACK_IMPORTED_MODULE_11__components_dashboard_dashboard_component__["a" /* DashboardComponent */],
             __WEBPACK_IMPORTED_MODULE_12__components_profile_profile_component__["a" /* ProfileComponent */],
-            __WEBPACK_IMPORTED_MODULE_16__components_upload_upload_component__["a" /* UploadComponent */]
+            __WEBPACK_IMPORTED_MODULE_16__components_upload_upload_component__["a" /* UploadComponent */],
+            __WEBPACK_IMPORTED_MODULE_17__directives_codeformatter_directive__["a" /* CodeformatterDirective */]
         ],
         imports: [
             __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
@@ -649,7 +652,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/components/upload/upload.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"form-group\">\r\n            <input type=\"file\" class=\"form-control\" name='avatar' required [(ngModel)]='avatar' (change)=\"getFiles($event)\"> \r\n</div>"
+module.exports = "<div class=\"form-group\">\r\n            <input type=\"file\" class=\"form-control\" name='avatar' required [(ngModel)]='avatar' (change)=\"getFiles($event)\"> \r\n</div>\r\n\r\n<pre>\r\n<code appCodeformatter>{{filedata}}</code>\r\n</pre>"
 
 /***/ }),
 
@@ -676,13 +679,14 @@ var UploadComponent = (function () {
         this.formService = formService;
     }
     UploadComponent.prototype.getFiles = function (event) {
+        var _this = this;
         this.avatar = event.target.files;
         this.formService.uploadPic(this.avatar).subscribe(function (data) {
-            /*var filepath='./uploads/'+data.user.file[0].filename;
-            this.formService.getFile(filepath).subscribe(data=>{
-                console.log(data);
-            });*/
-            console.log(data);
+            var filepath = 'uploads/' + data.file[0].filename;
+            console.log(filepath);
+            _this.formService.getFile(filepath).subscribe(function (data) {
+                _this.filedata = data['_body'];
+            });
         });
     };
     UploadComponent.prototype.ngOnInit = function () {
@@ -700,6 +704,59 @@ UploadComponent = __decorate([
 
 var _a;
 //# sourceMappingURL=upload.component.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/directives/codeformatter.directive.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return CodeformatterDirective; });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var CodeformatterDirective = (function () {
+    function CodeformatterDirective(el) {
+        this.el = el;
+    }
+    CodeformatterDirective.prototype.ngAfterViewChecked = function () {
+        var code = this.el.nativeElement.innerHTML;
+        if (code != "") {
+            var regex_pattern = /(&lt;(\s*|\S*)&gt);/;
+            var formatted = code.split('\n');
+            var splittedstring = [];
+            for (var i = 0; i < formatted.length; i++) {
+                splittedstring.push(formatted[i].match(regex_pattern));
+                console.log(splittedstring);
+            }
+            /*for(var i=0;i<splittedstring.length;i++){
+         /*   var data=data+'&lt;<span class="color">'+this.splittedcode[i]+'</span>';
+            if(i==this.splittedcode.length-1){
+            this.el.nativeElement.innerHTML=data;
+            }
+                console.log(splittedstring[i]);
+        }*/
+        }
+    };
+    return CodeformatterDirective;
+}());
+CodeformatterDirective = __decorate([
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Directive"])({
+        selector: '[appCodeformatter]'
+    }),
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_0__angular_core__["ElementRef"]) === "function" && _a || Object])
+], CodeformatterDirective);
+
+var _a;
+//# sourceMappingURL=codeformatter.directive.js.map
 
 /***/ }),
 
@@ -869,6 +926,9 @@ var FormService = (function () {
         var formData = new FormData();
         formData.append("files", pic[0], pic[0]['name']);
         return this.http.put('users/upload/username=vipin', formData).map(function (response) { return response.json(); });
+    };
+    FormService.prototype.getFile = function (url) {
+        return this.http.get(url).map(function (res) { return res; });
     };
     return FormService;
 }());
