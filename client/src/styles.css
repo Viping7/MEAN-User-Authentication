@@ -1,4 +1,9 @@
 @import "https://bootswatch.com/darkly/bootstrap.min.css";
+
+pre{
+    background: #333;
+    color: #fff;
+}
 .color{
-    color:darkgreen;
+    color:#7df47d;
 }

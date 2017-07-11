@@ -729,21 +729,13 @@ var CodeformatterDirective = (function () {
     }
     CodeformatterDirective.prototype.ngAfterViewChecked = function () {
         var code = this.el.nativeElement.innerHTML;
-        if (code != "") {
-            var regex_pattern = /(&lt;(\s*|\S*)&gt);/;
-            var formatted = code.split('\n');
-            var splittedstring = [];
-            for (var i = 0; i < formatted.length; i++) {
-                splittedstring.push(formatted[i].match(regex_pattern));
-                console.log(splittedstring);
-            }
-            /*for(var i=0;i<splittedstring.length;i++){
-         /*   var data=data+'&lt;<span class="color">'+this.splittedcode[i]+'</span>';
-            if(i==this.splittedcode.length-1){
-            this.el.nativeElement.innerHTML=data;
-            }
-                console.log(splittedstring[i]);
-        }*/
+        var regex = /(&lt;)(\s*|\S*)(&gt;)/g;
+        var m;
+        if (code != '') {
+            var formattedcode = code.replace(/&lt;/gi, "<span class='color'>&lt;</span>");
+            formattedcode = formattedcode.replace(/&gt;/gi, "<span class='color'>&gt;</span>");
+            console.log(formattedcode);
+            this.el.nativeElement.innerHTML = formattedcode;
         }
     };
     return CodeformatterDirective;

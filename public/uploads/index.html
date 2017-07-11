@@ -1,0 +1,32 @@
+<html>
+    <head>
+      <style>
+            .ele{
+                height: 200px;
+                background:#999
+            }
+            .addHeight{
+                height:100%;
+            }
+      </style>
+    </head>
+    <body>
+        <div class="ele" style=""></div>
+        <button class="see-more">See More</button>
+        <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('.see-more').click(function(){
+                    if($('.ele').hasClass('addHeight')){
+                        $('.ele').removeClass('addHeight');
+                    }
+                    else{
+                        $('.ele').addClass('addHeight');
+                    }
+                }) 
+            });
+        </script>
+    </body>
+    
+    
+</html>
